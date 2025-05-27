@@ -60,7 +60,7 @@ class UserProfileForm(forms.ModelForm):
             self.fields['username'].initial = self.instance.user.username
             self.fields['email'].initial = self.instance.user.email
 
-        if self.isinstance and self.instance.favorite_cuisines:
+        if isinstance and self.instance.favorite_cuisines:
             self.fields['favorite_cuisines'].initial = self.instance.get_favorite_cuisines_list()
 
     def save(self, commit=True):

@@ -106,8 +106,8 @@
                     <div class="cuisines-grid">
                         {% for cuisine in cuisines %}
                         <div class="cuisine-item">
-                            <input type="checkbox" id="cuisine_{{ forloop.counter }}" name="favorite_cuisines" value="{{ cuisine }}">
-                            <label for="cuisine_{{ forloop.counter }}">{{ cuisine }}</label>
+                            <input type="checkbox" id="cuisine_{{ forloop.counter }}" name="favorite_cuisines" value="{{ cuisine.0 }}">
+                            <label for="cuisine_{{ forloop.counter }}">{{ cuisine.1 }}</label>
                         </div>
                         {% endfor %}
                     </div>
