@@ -9,3 +9,6 @@ urlpatterns = [
     path('profile/create/', views.profile_create, name='create_profile'),
     path('profile/<str:username>/', views.profile_detail, name='profile_detail'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
