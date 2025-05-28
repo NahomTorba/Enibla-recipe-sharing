@@ -1,8 +1,11 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
     path('profile/create/', views.profile_create, name='create_profile'),
+    path('profile/<str:username>/', views.profile_detail, name='profile_detail'),
 ]

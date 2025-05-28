@@ -35,3 +35,27 @@ def profile_create(request):
         'cuisines': UserProfile.CUISINE_CHOICES,
     }
     return render(request, 'Create_Profile.html', context)
+
+def profile_detail(request, username):
+    try:
+        user = User.objects.get(username=username)
+        profile = UserProfile.objects.get(user=user)
+    except (User.DoesNotExist, UserProfile.DoesNotExist):
+        messages.error(request, 'Profile not found.')
+        return redirect('home')
+    
+    context = {
+        'profile': profile,
+    }
+    return render(request, 'profile_detail.html', context)
+
+def my_profile(request):
+    """Redirect to current user's profile"""
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        return redirect('profile_detail', username=request.user.username)
+    except UserProfile.DoesNotExist:
+        return redirect('create_profile')
