@@ -44,6 +44,6 @@ class Recipe(models.Model):
         if self.tags:
             return self.tags.split(',')
         return[]
-    class meta:
+    class Meta:
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
