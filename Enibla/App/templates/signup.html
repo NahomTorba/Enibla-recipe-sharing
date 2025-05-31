@@ -1,0 +1,248 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Enibla - Sign Up</title>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                <h1>Enibla</h1>
+            </div>
+            <h2>Join Our Culinary Community</h2>
+            <p>Create your account and start sharing amazing recipes</p>
+        </div>
+
+        <!-- Signup Form -->
+        <div class="auth-container">
+            <div class="card auth-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-user-plus"></i> Create Your Account</h3>
+                    <p>Fill in your details to get started</p>
+                </div>
+                <div class="card-content">
+                    {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                                <div class="message message-{{ message.tags }}">
+                                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form id="signupForm" method="post" action="{% url 'signup' %}">
+                        {% csrf_token %}
+                        
+                        <!-- Name Fields -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="first_name">First Name *</label>
+                                <input 
+                                    type="text" 
+                                    id="first_name" 
+                                    name="first_name" 
+                                    required 
+                                    placeholder="Enter your first name"
+                                    value="{{ form.first_name.value|default:'' }}"
+                                >
+                                {% if form.first_name.errors %}
+                                    <div class="field-errors">
+                                        {% for error in form.first_name.errors %}
+                                            <span class="error-text">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="last_name">Last Name *</label>
+                                <input 
+                                    type="text" 
+                                    id="last_name" 
+                                    name="last_name" 
+                                    required 
+                                    placeholder="Enter your last name"
+                                    value="{{ form.last_name.value|default:'' }}"
+                                >
+                                {% if form.last_name.errors %}
+                                    <div class="field-errors">
+                                        {% for error in form.last_name.errors %}
+                                            <span class="error-text">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Username Field -->
+                        <div class="form-group">
+                            <label for="username">Username *</label>
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                required 
+                                placeholder="Choose a unique username"
+                                value="{{ form.username.value|default:'' }}"
+                            >
+                            <div class="field-help">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Your username will be visible to other users</span>
+                            </div>
+                            {% if form.username.errors %}
+                                <div class="field-errors">
+                                    {% for error in form.username.errors %}
+                                        <span class="error-text">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Email Field -->
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                required 
+                                placeholder="Enter your email address"
+                                value="{{ form.email.value|default:'' }}"
+                            >
+                            <div class="field-help">
+                                <i class="fas fa-info-circle"></i>
+                                <span>We'll use this to send you recipe updates and notifications</span>
+                            </div>
+                            {% if form.email.errors %}
+                                <div class="field-errors">
+                                    {% for error in form.email.errors %}
+                                        <span class="error-text">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Password Fields -->
+                        <div class="form-group">
+                            <label for="password1">Password *</label>
+                            <div class="password-input-container">
+                                <input 
+                                    type="password" 
+                                    id="password1" 
+                                    name="password1" 
+                                    required 
+                                    placeholder="Create a strong password"
+                                >
+                                <button type="button" class="password-toggle" id="togglePassword1">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength" id="passwordStrength">
+                                <div class="strength-bar">
+                                    <div class="strength-fill" id="strengthFill"></div>
+                                </div>
+                                <span class="strength-text" id="strengthText">Password strength</span>
+                            </div>
+                            {% if form.password1.errors %}
+                                <div class="field-errors">
+                                    {% for error in form.password1.errors %}
+                                        <span class="error-text">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password2">Confirm Password *</label>
+                            <div class="password-input-container">
+                                <input 
+                                    type="password" 
+                                    id="password2" 
+                                    name="password2" 
+                                    required 
+                                    placeholder="Confirm your password"
+                                >
+                                <button type="button" class="password-toggle" id="togglePassword2">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="password-match" id="passwordMatch" style="display: none;">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Passwords match</span>
+                            </div>
+                            {% if form.password2.errors %}
+                                <div class="field-errors">
+                                    {% for error in form.password2.errors %}
+                                        <span class="error-text">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="terms" name="terms" required>
+                                <label for="terms" class="checkbox-label">
+                                    I agree to the <a href="#" class="link">Terms of Service</a> and <a href="#" class="link">Privacy Policy</a> *
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
+                                <i class="fas fa-user-plus"></i>
+                                Create Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Login Link -->
+            <div class="auth-footer">
+                <p>Already have an account? <a href="#" class="link">Sign in here</a></p>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features-section">
+            <h3>Why Join Enibla?</h3>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-share-alt feature-icon"></i>
+                    <h4>Share Recipes</h4>
+                    <p>Share your favorite recipes with food lovers around the world</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-users feature-icon"></i>
+                    <h4>Join Community</h4>
+                    <p>Connect with fellow cooking enthusiasts and discover new cuisines</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-bookmark feature-icon"></i>
+                    <h4>Save Favorites</h4>
+                    <p>Bookmark recipes you love and create your personal cookbook</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-star feature-icon"></i>
+                    <h4>Get Inspired</h4>
+                    <p>Discover amazing recipes from different cultures and cooking styles</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/auth.js' %}"></script>
+</body>
+</html>
