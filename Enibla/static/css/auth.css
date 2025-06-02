@@ -215,6 +215,18 @@
   cursor: pointer;
 }
 
+/* Remember Me & Forgot Password Row */
+.remember-forgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.forgot-link {
+  font-size: 0.875rem;
+}
+
 /* Links */
 .link {
   color: #ea580c;
@@ -235,10 +247,20 @@
   font-size: 1rem;
 }
 
+.btn-large {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+}
+
 /* Features Section */
 .features-section {
   margin-top: 3rem;
   text-align: center;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
+  margin-bottom: 3rem;
 }
 
 .features-section h3 {
@@ -272,6 +294,10 @@
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .feature-item:hover {
@@ -297,6 +323,322 @@
   font-size: 0.875rem;
   line-height: 1.4;
   margin: 0;
+}
+
+/* Help Section */
+.help-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.help-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.help-item:last-child {
+  margin-bottom: 0;
+}
+
+.help-item i {
+  color: #ea580c;
+  font-size: 1.25rem;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+
+.help-item h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.help-item p {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Success and Error Cards */
+.success-card,
+.error-card {
+  text-align: center;
+}
+
+.success-icon,
+.error-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.success-icon {
+  color: #16a34a;
+}
+
+.error-icon {
+  color: #dc2626;
+}
+
+.success-card h3,
+.error-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.success-message,
+.error-message {
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+/* Instructions */
+.instructions {
+  text-align: left;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border-left: 4px solid #ea580c;
+}
+
+.instructions h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.instructions ol {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.instructions li {
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+/* Troubleshooting */
+.troubleshooting {
+  text-align: left;
+  margin: 2rem 0;
+}
+
+.troubleshooting h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.troubleshooting-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .troubleshooting-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.troubleshooting-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.troubleshooting-item i {
+  color: #ea580c;
+  font-size: 1rem;
+}
+
+/* Password Requirements */
+.password-requirements {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.password-requirements h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.75rem;
+}
+
+.password-requirements ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.password-requirements li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.password-requirements li:last-child {
+  margin-bottom: 0;
+}
+
+.password-requirements li i {
+  color: #dc2626;
+  font-size: 0.75rem;
+}
+
+.password-requirements li.valid i {
+  color: #16a34a;
+}
+
+.password-requirements li.valid i::before {
+  content: "\f00c"; /* fa-check */
+}
+
+/* Possible Reasons */
+.possible-reasons {
+  text-align: left;
+  margin: 2rem 0;
+}
+
+.possible-reasons h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.possible-reasons ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.possible-reasons li {
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+/* Security Tips */
+.security-tips {
+  text-align: left;
+  margin: 2rem 0;
+}
+
+.security-tips h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .tips-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.tip-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.tip-item i {
+  color: #ea580c;
+  font-size: 1rem;
+}
+
+/* Next Steps */
+.next-steps {
+  text-align: left;
+  margin: 2rem 0;
+}
+
+.next-steps h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.step-number {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: #ea580c;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.step-content h5 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.step-content p {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 768px) {
+  .action-buttons {
+    flex-direction: row;
+    justify-content: center;
+  }
 }
 
 /* Form Validation States */
@@ -339,8 +681,15 @@
     padding: 0 0.5rem;
   }
 
+  .remember-forgot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
   .features-section {
     margin-top: 2rem;
+    padding: 0 0.5rem;
   }
 
   .features-grid {
@@ -369,5 +718,14 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }

@@ -5,11 +5,12 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from .email_utils import send_confirmation_email
 from django.contrib.auth.forms import AuthenticationForm
+from django.http import HttpResponse 
 
 # Create your views here.
 def signup(request):
     if request.user.is_authenticated:
-        return redirect('my_profile')
+        return redirect('index')
     
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -26,7 +27,7 @@ def signup(request):
             if user:
                 login(request, user)
                 messages.success(request, 'Welcome to Enibla! Please create your profile to get started.')
-                return redirect('create_profile')
+                return redirect('index')
             else:
                 return redirect('login')
         else:
@@ -37,11 +38,11 @@ def signup(request):
     context = {
         'form': form,
     }
-    return render(request, 'signup.html', context)
+    return render(request, 'auth/signup.html', context)
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('my_profile')
+        return redirect('index')
     
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -58,7 +59,7 @@ def login_view(request):
                 next_page = request.POST.get('next')
                 if next_page:
                     return redirect(next_page)
-                return redirect('my_profile')
+                return redirect('index')
             else:
                 messages.error(request, 'Invalid username or password.')
         else:
@@ -69,4 +70,19 @@ def login_view(request):
     context = {
         'form': form,
     }
-    return render(request, 'login.html', context)
+    return render(request, 'auth/login.html', context)
+
+def index(request):
+    html = """
+        <html>
+            <head>
+                <title>Enibla - Home</title>
+                <meta charset="UTF-8">
+            </head>
+            <body>
+                <h1>Welcome to Enibla</h1>
+                <h2>This is the sample home page this means you have logged in successfully </h2>
+            </body>
+        </html>
+    """
+    return HttpResponse(html)
