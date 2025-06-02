@@ -7,4 +7,5 @@ from django.conf import settings
 urlpatterns = [
     # Authentication URLs
     path('signup/', views.signup, name='signup'),
+    path('login/', views.login_view, name='login'),
 ]
