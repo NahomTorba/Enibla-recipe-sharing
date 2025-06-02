@@ -3,6 +3,7 @@ from django.contrib import messages
 from .forms import SignUpForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
+from .email_utils import send_confirmation_email
 
 # Create your views here.
 def signup(request):
@@ -13,6 +14,9 @@ def signup(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
+            # Send confirmation email
+            send_confirmation_email(user)
+            # Display success message
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}! You can now log in.')
             
