@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Out - Enibla</title>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                <h1>Enibla</h1>
+            </div>
+            <h2>Log Out</h2>
+            <p>Are you sure you want to log out of your account?</p>
+        </div>
+
+        <!-- Logout Confirmation -->
+        <div class="auth-container">
+            <div class="card auth-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-sign-out-alt"></i> Confirm Logout</h3>
+                    <p>You will need to log in again to access your account</p>
+                </div>
+                <div class="card-content">
+                    <div class="logout-info">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                {% if request.user.userprofile.profile_image %}
+                                    <img src="{{ request.user.userprofile.profile_image.url }}" alt="Profile" class="avatar-small">
+                                {% else %}
+                                    <div class="avatar-small avatar-placeholder-small">
+                                        {% if request.user.first_name %}
+                                            <span class="avatar-initial-small">{{ request.user.first_name.0|upper }}</span>
+                                        {% else %}
+                                            <i class="fas fa-user"></i>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="user-details">
+                                <h4>{{ request.user.get_full_name|default:request.user.username }}</h4>
+                                <p>{{ request.user.email }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="logout-actions">
+                        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-full" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Yes, Log Me Out
+                            </button>
+                        </form>
+                        
+                        <a href="{% url 'my_profile' %}" class="btn btn-outline btn-full">
+                            <i class="fas fa-arrow-left"></i>
+                            Cancel
+                        </a>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <h4>Before you go...</h4>
+                        <div class="actions-grid">
+                            <a href="{% url 'create_recipe' %}" class="action-item">
+                                <i class="fas fa-plus"></i>
+                                <span>Share a Recipe</span>
+                            </a>
+                            <a href="{% url 'edit_profile' %}" class="action-item">
+                                <i class="fas fa-edit"></i>
+                                <span>Update Profile</span>
+                            </a>
+                            <a href="{% url 'recipe_list' %}" class="action-item">
+                                <i class="fas fa-search"></i>
+                                <span>Browse Recipes</span>
+                            </a>
+                            <a href="{% url 'my_profile' %}" class="action-item">
+                                <i class="fas fa-user"></i>
+                                <span>View Profile</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const logoutBtn = document.getElementById("logoutBtn")
+            
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", (e) => {
+                    // Show loading state
+                    logoutBtn.disabled = true
+                    logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging Out...'
+                    logoutBtn.classList.add("loading")
+                })
+            }
+        })
+    </script>
+</body>
+</html>

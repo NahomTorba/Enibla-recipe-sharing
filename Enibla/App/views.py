@@ -6,6 +6,8 @@ from django.contrib.auth import authenticate, login
 from .email_utils import send_confirmation_email
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse 
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 
 # Create your views here.
 def signup(request):
@@ -72,6 +74,14 @@ def login_view(request):
     }
     return render(request, 'auth/login.html', context)
 
+@login_required
+def logout_view(request):
+    user_name = request.user.first_name if request.user.first_name else request.user.username
+    logout(request)
+    messages.success(request, f'Goodbye {user_name}! You have been logged out successfully.')
+    return redirect('login')
+
+@login_required
 def index(request):
     html = """
         <html>
