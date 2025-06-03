@@ -1,0 +1,419 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Enibla</title>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/edit_profile.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="#" class="logo-link">
+                    <i class="fas fa-utensils"></i>
+                    <span>Enibla</span>
+                </a>
+            </div>
+            
+            <div class="nav-links">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="{% url 'my_profile' %}" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </a>
+                <a href="#" class="nav-link nav-link-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="breadcrumb">
+                <a href="#">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="{% url 'my_profile' %}">My Profile</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>Edit Profile</span>
+            </div>
+            
+            <div class="page-title">
+                <div class="title-content">
+                    <div class="title-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div>
+                        <h1>Edit Your Profile</h1>
+                        <p>Update your information and preferences</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message message-{{ message.tags }}">
+                        <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                        <button class="message-close" onclick="this.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form id="editProfileForm" method="post" enctype="multipart/form-data" action="{% url 'edit_profile' %}">
+            {% csrf_token %}
+            
+            <!-- Profile Picture Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-camera"></i> Profile Picture</h3>
+                    <p>Update your profile photo</p>
+                </div>
+                <div class="card-content profile-picture-section">
+                    <div class="profile-picture-upload">
+                        <div class="avatar-container">
+                            <div class="avatar" id="avatarPreview">
+                                {% if profile.profile_image %}
+                                    <img id="profileImagePreview" src="{{ profile.profile_image.url }}" alt="Profile picture">
+                                {% else %}
+                                    <img id="profileImagePreview" style="display: none;" alt="Profile preview">
+                                    {% if user.first_name %}
+                                        <span class="avatar-initial" id="avatarInitial">{{ user.first_name.0|upper }}</span>
+                                    {% else %}
+                                        <i class="fas fa-camera avatar-icon" id="avatarIcon"></i>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <button type="button" class="upload-btn" id="uploadBtn">
+                                <i class="fas fa-upload"></i>
+                            </button>
+                        </div>
+                        <input type="file" id="profileImage" name="profile_image" accept="image/*" style="display: none;">
+                        <div class="upload-actions">
+                            <button type="button" class="btn btn-outline" id="changePhotoBtn">
+                                {% if profile.profile_image %}Change Photo{% else %}Upload Photo{% endif %}
+                            </button>
+                            {% if profile.profile_image %}
+                                <button type="button" class="btn btn-outline btn-danger" id="removePhotoBtn">Remove</button>
+                                <input type="checkbox" id="removeImageCheckbox" name="remove_image" style="display: none;">
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-user"></i> Basic Information</h3>
+                    <p>Update your personal details</p>
+                </div>
+                <div class="card-content">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first_name">First Name *</label>
+                            <input 
+                                type="text" 
+                                id="first_name" 
+                                name="first_name" 
+                                required 
+                                placeholder="Enter your first name"
+                                value="{{ user.first_name|default:'' }}"
+                            >
+                            {% if form.first_name.errors %}
+                                <div class="field-errors">
+                                    {% for error in form.first_name.errors %}
+                                        <span class="error-text">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label for="last_name">Last Name *</label>
+                            <input 
+                                type="text" 
+                                id="last_name" 
+                                name="last_name" 
+                                required 
+                                placeholder="Enter your last name"
+                                value="{{ user.last_name|default:'' }}"
+                            >
+                            {% if form.last_name.errors %}
+                                <div class="field-errors">
+                                    {% for error in form.last_name.errors %}
+                                        <span class="error-text">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="username">Username *</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            required 
+                            placeholder="Choose a unique username"
+                            value="{{ user.username|default:'' }}"
+                        >
+                        <div class="field-help">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Your username will be visible to other users and used in your profile URL</span>
+                        </div>
+                        {% if form.username.errors %}
+                            <div class="field-errors">
+                                {% for error in form.username.errors %}
+                                    <span class="error-text">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            required 
+                            placeholder="Enter your email address"
+                            value="{{ user.email|default:'' }}"
+                        >
+                        <div class="field-help">
+                            <i class="fas fa-info-circle"></i>
+                            <span>We'll use this for important account notifications</span>
+                        </div>
+                        {% if form.email.errors %}
+                            <div class="field-errors">
+                                {% for error in form.email.errors %}
+                                    <span class="error-text">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bio Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-pen"></i> About You</h3>
+                    <p>Tell others about your culinary journey</p>
+                </div>
+                <div class="card-content">
+                    <div class="form-group">
+                        <label for="bio">Bio</label>
+                        <textarea 
+                            id="bio" 
+                            name="bio" 
+                            placeholder="Tell us about your culinary journey, favorite cooking memories, or what you love about food..."
+                            maxlength="500"
+                        >{{ profile.bio|default:'' }}</textarea>
+                        <div class="char-counter">
+                            <span id="charCount">{{ profile.bio|length|default:0 }}</span>/500 characters
+                        </div>
+                        {% if form.bio.errors %}
+                            <div class="field-errors">
+                                {% for error in form.bio.errors %}
+                                    <span class="error-text">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Favorite Cuisines -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-heart"></i> Favorite Cuisines</h3>
+                    <p>Select the types of cuisine you love to cook or eat</p>
+                </div>
+                <div class="card-content">
+                    <div class="cuisines-grid">
+                        {% for cuisine in cuisines %}
+                        <div class="cuisine-item">
+                            <input 
+                                type="checkbox" 
+                                id="cuisine_{{ forloop.counter }}" 
+                                name="favorite_cuisines" 
+                                value="{{ cuisine }}"
+                                {% if cuisine in selected_cuisines %}checked{% endif %}
+                            >
+                            <label for="cuisine_{{ forloop.counter }}" class="cuisine-label">
+                                <span class="cuisine-checkbox">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                <span class="cuisine-name">{{ cuisine }}</span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div id="selectedCuisines" class="selected-cuisines" {% if not selected_cuisines %}style="display: none;"{% endif %}>
+                        <p><strong>Selected cuisines:</strong></p>
+                        <div id="cuisineTags" class="cuisine-tags">
+                            {% for cuisine in selected_cuisines %}
+                                <span class="cuisine-tag">{{ cuisine }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Settings -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-cog"></i> Account Settings</h3>
+                    <p>Manage your account preferences</p>
+                </div>
+                <div class="card-content">
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Profile Visibility</h4>
+                                <p>Your profile is currently public and visible to all users</p>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked disabled>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Email Notifications</h4>
+                                <p>Receive notifications about new followers and recipe interactions</p>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked disabled>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="account-actions">
+                        <a href="#" class="account-link">
+                            <i class="fas fa-key"></i>
+                            <span>Change Password</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="#" class="account-link account-link-danger">
+                            <i class="fas fa-trash"></i>
+                            <span>Delete Account</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="form-actions">
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-save"></i>
+                        Save Changes
+                    </button>
+                    <a href="{% url 'my_profile' %}" class="btn btn-outline">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                </div>
+                
+                <div class="save-indicator" id="saveIndicator">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Changes saved successfully!</span>
+                </div>
+            </div>
+        </form>
+
+        <!-- Preview Section -->
+        <div class="preview-section">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-eye"></i> Profile Preview</h3>
+                    <p>See how your profile will look to others</p>
+                </div>
+                <div class="card-content">
+                    <div class="profile-preview" id="profilePreview">
+                        <div class="preview-header">
+                            <div class="preview-avatar">
+                                {% if profile.profile_image %}
+                                    <img src="{{ profile.profile_image.url }}" alt="Profile" id="previewImage">
+                                {% else %}
+                                    <div class="preview-avatar-placeholder" id="previewAvatar">
+                                        {% if user.first_name %}
+                                            <span id="previewInitial">{{ user.first_name.0|upper }}</span>
+                                        {% else %}
+                                            <i class="fas fa-user"></i>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="preview-info">
+                                <h4 id="previewName">{{ user.get_full_name|default:user.username }}</h4>
+                                <p id="previewUsername">@{{ user.username }}</p>
+                                <div class="preview-meta">
+                                    <span><i class="fas fa-envelope"></i> {{ user.email }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if profile.bio %}
+                            <div class="preview-bio">
+                                <h5>About</h5>
+                                <p id="previewBio">{{ profile.bio }}</p>
+                            </div>
+                        {% else %}
+                            <div class="preview-bio" style="display: none;">
+                                <h5>About</h5>
+                                <p id="previewBio">No bio provided</p>
+                            </div>
+                        {% endif %}
+                        
+                        {% if selected_cuisines %}
+                            <div class="preview-cuisines">
+                                <h5>Favorite Cuisines</h5>
+                                <div class="preview-cuisine-tags" id="previewCuisines">
+                                    {% for cuisine in selected_cuisines %}
+                                        <span class="preview-cuisine-tag">{{ cuisine }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="preview-cuisines" style="display: none;">
+                                <h5>Favorite Cuisines</h5>
+                                <div class="preview-cuisine-tags" id="previewCuisines"></div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/edit_profile.js' %}"></script>
+</body>
+</html>

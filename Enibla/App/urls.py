@@ -7,7 +7,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('profile/create/', views.profile_create, name='create_profile'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('profile/<str:username>/', views.profile_detail, name='profile_detail'),
+    path('my-profile/', views.my_profile, name='my_profile'),
 ]
 
 if settings.DEBUG:
