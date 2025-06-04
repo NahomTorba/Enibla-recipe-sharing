@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Profile - Enibla</title>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                <h1>Enibla</h1>
+            </div>
+            <h2>Create Your Profile</h2>
+            <p>Share your cooking-related journey with the Enibla community</p>
+        </div>
+
+        <form id="profileForm" method="post" enctype="multipart/form-data" action="{% url 'create_profile' %}">
+            {% csrf_token %}
+            
+            <!-- Profile Picture Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-user"></i> Profile Picture</h3>
+                    <p>Upload a photo to help others recognize you in the community</p>
+                </div>
+                <div class="card-content profile-picture-section">
+                    <div class="profile-picture-upload">
+                        <div class="avatar-container">
+                            <div class="avatar" id="avatarPreview">
+                                <i class="fas fa-camera avatar-icon"></i>
+                                <img id="profileImagePreview" style="display: none;" alt="Profile preview">
+                            </div>
+                            <button type="button" class="upload-btn" id="uploadBtn">
+                                <i class="fas fa-upload"></i>
+                            </button>
+                        </div>
+                        <input type="file" id="profileImage" name="profile_image" accept="image/*" style="display: none;">
+                        <div class="upload-actions">
+                            <button type="button" class="btn btn-outline" id="changePhotoBtn">Upload Photo</button>
+                            <button type="button" class="btn btn-outline" id="removePhotoBtn" style="display: none;">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Basic Information</h3>
+                    <p>Tell us about yourself</p>
+                </div>
+                <div class="card-content">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name *</label>
+                            <input type="text" id="firstName" name="first_name" required placeholder="Enter your first name">
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name *</label>
+                            <input type="text" id="lastName" name="last_name" required placeholder="Enter your last name">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="username">Username *</label>
+                        <input type="text" id="username" name="username" required placeholder="Choose a unique username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required placeholder="Enter your email address">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bio Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>About You</h3>
+                    <p>Share your cooking story, experience, or what inspires you in the kitchen</p>
+                </div>
+                <div class="card-content">
+                    <div class="form-group">
+                        <label for="bio">Bio</label>
+                        <textarea id="bio" name="bio" placeholder="Tell us about your culinary journey, favorite cooking memories, or what you love about food..." maxlength="500"></textarea>
+                        <div class="char-counter">
+                            <span id="charCount">0</span>/500 characters
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Favorite Cuisines -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Favorite Cuisines</h3>
+                    <p>Select the types of cuisine you love to cook or eat (select multiple)</p>
+                </div>
+                <div class="card-content">
+                    <div class="cuisines-grid">
+                        {% for cuisine in cuisines %}
+                        <div class="cuisine-item">
+                            <input type="checkbox" id="cuisine_{{ forloop.counter }}" name="favorite_cuisines" value="{{ cuisine.0 }}">
+                            <label for="cuisine_{{ forloop.counter }}">{{ cuisine.1 }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div id="selectedCuisines" class="selected-cuisines" style="display: none;">
+                        <p><strong>Selected cuisines:</strong></p>
+                        <div id="cuisineTags" class="cuisine-tags"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="submit-section">
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-save"></i>
+                    Create Profile
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script src="{% static 'js/profile.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ profile.user.get_full_name|default:profile.user.username }} - Enibla</title>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile_detail.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                <h1>Enibla</h1>
+            </div>
+        </div>
+
+        <!-- Profile Header Card -->
+        <div class="card profile-header-card">
+            <div class="card-content profile-header">
+                <div class="profile-avatar">
+                    {% if profile.profile_image %}
+                        <img src="{{ profile.profile_image.url }}" alt="{{ profile.user.get_full_name|default:profile.user.username }}" class="avatar-large">
+                    {% else %}
+                        <div class="avatar-large avatar-placeholder">
+                            {% if profile.user.first_name %}
+                                <span class="avatar-initial-large">{{ profile.user.first_name.0|upper }}</span>
+                            {% else %}
+                                <i class="fas fa-user avatar-icon-large"></i>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="profile-info">
+                    <h1 class="profile-name">
+                        {% if profile.user.get_full_name %}
+                            {{ profile.user.get_full_name }}
+                        {% else %}
+                            {{ profile.user.username }}
+                        {% endif %}
+                    </h1>
+                    
+                    {% if profile.user.get_full_name %}
+                        <p class="profile-username">@{{ profile.user.username }}</p>
+                    {% endif %}
+                    
+                    <div class="profile-meta">
+                        <span class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            Joined {{ profile.created_at|date:"F Y" }}
+                        </span>
+                        {% if profile.user.email and request.user == profile.user %}
+                            <span class="meta-item">
+                                <i class="fas fa-envelope"></i>
+                                {{ profile.user.email }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if request.user == profile.user %}
+                        <div class="profile-actions">
+                            <a href="{% url 'edit_profile' %}" class="btn btn-primary">
+                                <i class="fas fa-edit"></i>
+                                Edit Profile
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Bio Section -->
+        {% if profile.bio %}
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-user-circle"></i> About</h3>
+            </div>
+            <div class="card-content">
+                <p class="bio-text">{{ profile.bio|linebreaks }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Favorite Cuisines Section -->
+        {% if profile.favorite_cuisines %}
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-heart"></i> Favorite Cuisines</h3>
+                <p>{{ profile.user.first_name|default:profile.user.username }}'s preferred types of cuisine</p>
+            </div>
+            <div class="card-content">
+                <div class="cuisine-tags">
+                    {% for cuisine in profile.get_favorite_cuisines_list %}
+                        <span class="cuisine-tag">{{ cuisine }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recipe Stats Section (Placeholder for future features) -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-chart-bar"></i> Recipe Stats</h3>
+                <p>{{ profile.user.first_name|default:profile.user.username }}'s cooking journey</p>
+            </div>
+            <div class="card-content">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Recipes Shared</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Recipes Tried</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Followers</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Following</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Recipes Section (Placeholder for future features) -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-utensils"></i> Recent Recipes</h3>
+                <p>Latest recipes shared by {{ profile.user.first_name|default:profile.user.username }}</p>
+            </div>
+            <div class="card-content">
+                <div class="empty-state">
+                    <i class="fas fa-utensils empty-icon"></i>
+                    <h4>No recipes yet</h4>
+                    <p>{{ profile.user.first_name|default:profile.user.username }} hasn't shared any recipes yet.</p>
+                    {% if request.user == profile.user %}
+                        <a href="#" class="btn btn-outline">
+                            <i class="fas fa-plus"></i>
+                            Share Your First Recipe
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="navigation-section">
+            <a href="#" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i>
+                Back to Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>
