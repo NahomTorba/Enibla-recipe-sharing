@@ -22,15 +22,16 @@ urlpatterns = [
     path('', views.index, name='home'),
     path('index/', views.index, name='index'),
 
-    # Profile URLs
+    # URLs for profile
     path('profile/create/', views.profile_create, name='create_profile'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('profile/<str:username>/', views.profile_detail, name='profile_detail'),
     path('my-profile/', views.my_profile, name='my_profile'),
+
+    # URLs for recipes
+    path('recipes/create/', views.create_recipe, name='create_recipe'),
+    
 ]
-
-
-
 
 
 if settings.DEBUG:

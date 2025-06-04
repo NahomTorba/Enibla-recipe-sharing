@@ -7,9 +7,11 @@ from .email_utils import send_confirmation_email
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse 
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
+from django.contrib import messages
 from .models import UserProfile
 from .forms import UserProfileForm
+from django.contrib.auth.models import User
+from django.contrib.auth import logout
 
 # Create your views here.
 def signup(request):
@@ -204,3 +206,37 @@ def edit_profile(request):
         'selected_cuisines': selected_cuisines,
     }
     return render(request, 'profile/edit_profile.html', context)
+    
+TAG_CHOICES = (('breakfast', 'Breakfast'),('lunch', 'Lunch'),('dinner', 'Dinner'),('dessert', 'Dessert'),('snack', 'Snack'),('fasting', 'Fasting'),)
+
+def create_recipe(request):
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'Please create your profile first before sharing recipes.')
+        return redirect('create_profile')
+    
+    if request.method == 'POST':
+        form = RecipeForm(request.POST, request.FILES)
+        if form.is_valid():
+            recipe = form.save(commit=False)
+            recipe.author = profile
+            
+            # Handle tags
+            selected_tags = request.POST.getlist('tags')
+            recipe.tags = ','.join(selected_tags)
+            
+            recipe.save()
+            messages.success(request, 'Recipe shared successfully!')
+            return redirect('recipe_detail', recipe_id=recipe.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = RecipeForm()
+    
+    context = {
+        'form': form,
+        'tag_choices': TAG_CHOICES,
+    }
+    return render(request, 'create_recipe.html', context)
+
