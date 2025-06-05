@@ -8,8 +8,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import UserProfile
-from .forms import UserProfileForm
+from .models import UserProfile, Recipe
+from .forms import UserProfileForm, RecipeForm
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 
@@ -85,31 +85,30 @@ def logout_view(request):
     messages.success(request, f'Goodbye {user_name}! You have been logged out successfully.')
     return redirect('login')
 
-@login_required
 def index(request):
-    html = """
-        <html>
-            <head>
-                <title>Enibla - Home</title>
-                <meta charset="UTF-8">
-            </head>
-            <body>
-                <h1>Welcome to Enibla</h1>
-                <h2>This is the sample home page this means you have logged in successfully </h2>
-            </body>
-        </html>
-    """
-    return HttpResponse(html)
+    """Home page view with featured recipes and stats"""
+    # Get featured recipes (latest 6)
+    featured_recipes = Recipe.objects.select_related('author__user').order_by('-created_at')[:6]
+    
+    # Get community stats
+    total_recipes = Recipe.objects.count()
+    total_users = User.objects.count()
+    total_cuisines = len(CUISINE_CHOICES)
+    total_favorites = 0  # Placeholder for when favorites are implemented
+    
+    context = {
+        'featured_recipes': featured_recipes,
+        'total_recipes': total_recipes,
+        'total_users': total_users,
+        'total_cuisines': total_cuisines,
+        'total_favorites': total_favorites,
+    }
+    return render(request, 'home.html', context)
 
 CUISINE_CHOICES = [('Italian', 'Italian'),('Mexican', 'Mexican'),('Chinese', 'Chinese'),('Japanese', 'Japanese'),('Indian', 'Indian'),('French', 'French'),('Thai', 'Thai'),('Mediterranean', 'Mediterranean'),('American', 'American'),('Korean', 'Korean'),('Vietnamese', 'Vietnamese'),('Greek', 'Greek'),('Spanish', 'Spanish'),('Middle Eastern', 'Middle Eastern'),('Brazilian', 'Brazilian'),('German', 'German'),('British', 'British'),('African', 'African'),('Caribbean', 'Caribbean'),('Fusion', 'Fusion'),]
 
 @login_required
 def profile_create(request):
-# giving a test user until we do registration and authenticated login
-    test_user = User.objects.first()
-    request.user = test_user
-    profile, created = UserProfile.objects.get_or_create(user=request.user)
-# test user end here
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():

@@ -1,0 +1,404 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enibla - Discover & Share Amazing Recipes</title>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Logo -->
+            <div class="nav-logo">
+                <a href="{% url 'index' %}" class="logo-link">
+                    <i class="fas fa-utensils"></i>
+                    <span>Enibla</span>
+                </a>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="nav-search">
+                <form class="search-form" method="get" action="#">
+                    <div class="search-input-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" name="q" placeholder="Search recipes, ingredients, or cuisines..." class="search-input" value="{{ request.GET.q|default:'' }}">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="nav-links">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-utensils"></i>
+                    <span>Recipes</span>
+                </a>
+                
+                {% if user.is_authenticated %}
+                    <a href="{% url 'create_recipe' %}" class="nav-link nav-link-primary">
+                        <i class="fas fa-plus"></i>
+                        <span>Share Recipe</span>
+                    </a>
+                    
+                    <!-- Profile Dropdown -->
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <button class="profile-btn" id="profileBtn">
+                            {% if user.userprofile.profile_image %}
+                                <img src="{{ user.userprofile.profile_image.url }}" alt="Profile" class="profile-avatar">
+                            {% else %}
+                                <div class="profile-avatar profile-avatar-placeholder">
+                                    {% if user.first_name %}
+                                        <span class="avatar-initial">{{ user.first_name.0|upper }}</span>
+                                    {% else %}
+                                        <i class="fas fa-user"></i>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info">
+                                    {% if user.userprofile.profile_image %}
+                                        <img src="{{ user.userprofile.profile_image.url }}" alt="Profile" class="user-avatar">
+                                    {% else %}
+                                        <div class="user-avatar user-avatar-placeholder">
+                                            {% if user.first_name %}
+                                                <span class="user-avatar-initial">{{ user.first_name.0|upper }}</span>
+                                            {% else %}
+                                                <i class="fas fa-user"></i>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="user-details">
+                                        <h4>{{ user.get_full_name|default:user.username }}</h4>
+                                        <p>{{ user.email }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <a href="{% url 'my_profile' %}" class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span>My Profile</span>
+                            </a>
+                            
+                            <a href="{% url 'create_recipe' %}" class="dropdown-item">
+                                <i class="fas fa-plus"></i>
+                                <span>Share Recipe</span>
+                            </a>
+                            
+                            <a href="{% url 'edit_profile' %}" class="dropdown-item">
+                                <i class="fas fa-edit"></i>
+                                <span>Edit Profile</span>
+                            </a>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <a href="{% url 'logout' %}" class="dropdown-item dropdown-item-logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Log Out</span>
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Log In</span>
+                    </a>
+                    <a href="{% url 'signup' %}" class="nav-link nav-link-primary">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Sign Up</span>
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">Discover & Share Amazing Recipes</h1>
+                <p class="hero-subtitle">Join our culinary community and explore recipes from food lovers around the world</p>
+                
+                <div class="hero-actions">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'create_recipe' %}" class="btn btn-primary btn-large">
+                            <i class="fas fa-plus"></i>
+                            Share Your Recipe
+                        </a>
+                        <a href="0" class="btn btn-outline btn-large">
+                            <i class="fas fa-search"></i>
+                            Browse Recipes
+                        </a>
+                    {% else %}
+                        <a href="{% url 'signup' %}" class="btn btn-primary btn-large">
+                            <i class="fas fa-user-plus"></i>
+                            Join Enibla
+                        </a>
+                        <a href="#" class="btn btn-outline btn-large">
+                            <i class="fas fa-search"></i>
+                            Explore Recipes
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Quick Search -->
+                <div class="hero-search">
+                    <form class="hero-search-form" method="get" action="#">
+                        <div class="hero-search-container">
+                            <i class="fas fa-search"></i>
+                            <input type="text" name="q" placeholder="Search for recipes, ingredients, or cuisines..." value="{{ request.GET.q|default:'' }}">
+                            <button type="submit">Search</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Categories -->
+    <section class="categories">
+        <div class="container">
+            <h2 class="section-title">Explore by Category</h2>
+            <div class="categories-grid">
+                <a href="#" class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-coffee"></i>
+                    </div>
+                    <h3>Breakfast</h3>
+                    <p>Start your day right</p>
+                </a>
+                
+                <a href="#" class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-hamburger"></i>
+                    </div>
+                    <h3>Lunch</h3>
+                    <p>Midday delights</p>
+                </a>
+                
+                <a href="#" class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h3>Dinner</h3>
+                    <p>Evening favorites</p>
+                </a>
+                
+                <a href="#" class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-ice-cream"></i>
+                    </div>
+                    <h3>Desserts</h3>
+                    <p>Sweet endings</p>
+                </a>
+                
+                <a href="#" class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-cookie-bite"></i>
+                    </div>
+                    <h3>Snacks</h3>
+                    <p>Quick bites</p>
+                </a>
+                
+                <a href="#" class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    <h3>Fasting</h3>
+                    <p>Healthy choices</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Recipes -->
+    <section class="featured-recipes">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Featured Recipes</h2>
+                <a href="#" class="view-all-link">
+                    View All <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="recipes-grid">
+                {% for recipe in featured_recipes %}
+                    <div class="recipe-card">
+                        <div class="recipe-image">
+                            {% if recipe.image %}
+                                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+                            {% else %}
+                                <div class="recipe-placeholder">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                            {% endif %}
+                            {% if recipe.tags %}
+                                <div class="recipe-tags">
+                                    {% for tag in recipe.get_tag_choices_list %}
+                                        <span class="recipe-tag">{{ tag|title }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="recipe-content">
+                            <h3 class="recipe-title">{{ recipe.title }}</h3>
+                            <p class="recipe-description">{{ recipe.description|truncatewords:15 }}</p>
+                            
+                            <div class="recipe-meta">
+                                <div class="recipe-author">
+                                    {% if recipe.author.profile_image %}
+                                        <img src="{{ recipe.author.profile_image.url }}" alt="{{ recipe.author.user.get_full_name|default:recipe.author.user.username }}" class="author-avatar">
+                                    {% else %}
+                                        <div class="author-avatar author-avatar-placeholder">
+                                            {% if recipe.author.user.first_name %}
+                                                <span class="author-initial">{{ recipe.author.user.first_name.0|upper }}</span>
+                                            {% else %}
+                                                <i class="fas fa-user"></i>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                    <span class="author-name">{{ recipe.author.user.get_full_name|default:recipe.author.user.username }}</span>
+                                </div>
+                                <span class="recipe-date">{{ recipe.created_at|timesince }} ago</span>
+                            </div>
+                            
+                            <a href="{% url 'recipe_detail' recipe.id %}" class="recipe-link">
+                                View Recipe <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="empty-state">
+                        <i class="fas fa-utensils empty-icon"></i>
+                        <h3>No recipes yet</h3>
+                        <p>Be the first to share a delicious recipe!</p>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'create_recipe' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Share Your Recipe
+                            </a>
+                        {% else %}
+                            <a href="{% url 'signup' %}" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i>
+                                Join to Share
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Stats -->
+    <section class="community-stats">
+        <div class="container">
+            <h2 class="section-title">Join Our Growing Community</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div class="stat-number">{{ total_recipes|default:0 }}</div>
+                    <div class="stat-label">Recipes Shared</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">{{ total_users|default:0 }}</div>
+                    <div class="stat-label">Food Lovers</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="stat-number">{{ total_cuisines|default:20 }}</div>
+                    <div class="stat-label">Cuisines</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="stat-number">{{ total_favorites|default:0 }}</div>
+                    <div class="stat-label">Recipe Favorites</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Start Cooking?</h2>
+                <p>Join thousands of home cooks sharing their favorite recipes</p>
+                {% if not user.is_authenticated %}
+                    <div class="cta-actions">
+                        <a href="{% url 'signup' %}" class="btn btn-primary btn-large">
+                            <i class="fas fa-user-plus"></i>
+                            Create Free Account
+                        </a>
+                        <a href="{% url 'login' %}" class="btn btn-outline btn-large">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Log In
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="cta-actions">
+                        <a href="{% url 'create_recipe' %}" class="btn btn-primary btn-large">
+                            <i class="fas fa-plus"></i>
+                            Share Your First Recipe
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-utensils"></i>
+                    <span>Enibla</span>
+                </div>
+                <p class="footer-text">Connecting food lovers through amazing recipes</p>
+                <div class="footer-links">
+                    <a href="#">Browse Recipes</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'create_recipe' %}">Share Recipe</a>
+                        <a href="{% url 'my_profile' %}">My Profile</a>
+                    {% else %}
+                        <a href="{% url 'signup' %}">Join Us</a>
+                        <a href="{% url 'login' %}">Log In</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/home.js' %}"></script>
+</body>
+</html>

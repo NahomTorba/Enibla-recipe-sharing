@@ -19,7 +19,7 @@ urlpatterns = [
     path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='auth/password_reset_complete.html'), name='password_reset_complete'),
 
     # sample url for home page
-    path('', views.index, name='home'),
+    path('', views.index, name='index'),
     path('index/', views.index, name='index'),
 
     # URLs for profile
