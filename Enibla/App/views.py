@@ -5,13 +5,17 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from .email_utils import send_confirmation_email
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponse 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import UserProfile, Recipe
 from .forms import UserProfileForm, RecipeForm
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
+
+# constants
+CUISINE_CHOICES = [ ('Ethiopian', 'Ethiopian'), ('Eritrea', 'Eritrea'), ('African', 'African'), ('Italian', 'Italian'),('Mexican', 'Mexican'),('Chinese', 'Chinese'),('Japanese', 'Japanese'),('Indian', 'Indian'),('French', 'French'),('American', 'American'),('Korean', 'Korean'),('Spanish', 'Spanish'),('Middle Eastern', 'Middle Eastern'),('Brazilian', 'Brazilian'),('British', 'British')]
+TAG_CHOICES = (('breakfast', 'Breakfast'),('lunch', 'Lunch'),('dinner', 'Dinner'),('dessert', 'Dessert'),('snack', 'Snack'),('fasting', 'Fasting'),)
+
 
 # Create your views here.
 def signup(request):
@@ -105,10 +109,10 @@ def index(request):
     }
     return render(request, 'home.html', context)
 
-CUISINE_CHOICES = [('Italian', 'Italian'),('Mexican', 'Mexican'),('Chinese', 'Chinese'),('Japanese', 'Japanese'),('Indian', 'Indian'),('French', 'French'),('Thai', 'Thai'),('Mediterranean', 'Mediterranean'),('American', 'American'),('Korean', 'Korean'),('Vietnamese', 'Vietnamese'),('Greek', 'Greek'),('Spanish', 'Spanish'),('Middle Eastern', 'Middle Eastern'),('Brazilian', 'Brazilian'),('German', 'German'),('British', 'British'),('African', 'African'),('Caribbean', 'Caribbean'),('Fusion', 'Fusion'),]
 
 @login_required
 def profile_create(request):
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
@@ -206,7 +210,6 @@ def edit_profile(request):
     }
     return render(request, 'profile/edit_profile.html', context)
     
-TAG_CHOICES = (('breakfast', 'Breakfast'),('lunch', 'Lunch'),('dinner', 'Dinner'),('dessert', 'Dessert'),('snack', 'Snack'),('fasting', 'Fasting'),)
 
 def create_recipe(request):
     try:
