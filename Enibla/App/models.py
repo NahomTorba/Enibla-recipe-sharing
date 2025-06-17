@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 from django.utils import timezone
+from django.utils.text import slugify
 
 # Create your models here.
 class UserProfile(models.Model):
@@ -28,6 +29,7 @@ class UserProfile(models.Model):
 class Recipe(models.Model):
     author = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='recipes')
     title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True, max_length=200)
     description = models.TextField()
     ingredients = models.TextField()
     instructions = models.TextField()
@@ -37,13 +39,29 @@ class Recipe(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
     
     def get_tag_choices_list(self):
-        if self.tags:
-            return self.tags.split(',')
-        return[]
+        """Return a list of tag display names"""
+        if not self.tags:
+            return []
+        
+        tag_list = []
+        for tag in self.tags.split(','):  # Split by comma
+            tag = tag.strip()  # Remove any whitespace
+            if tag:  # Only add if not empty
+                # Find the matching tag choice
+                for value, display in self.TAG_CHOICES:
+                    if value == tag:
+                        tag_list.append(display)
+                        break
+        return tag_list
     class Meta:
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
