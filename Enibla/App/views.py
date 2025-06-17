@@ -230,7 +230,7 @@ def create_recipe(request):
             
             recipe.save()
             messages.success(request, 'Recipe shared successfully!')
-            return redirect('recipe_detail', recipe_id=recipe.id)
+            return redirect('recipe_detail', slug=recipe.slug)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -242,3 +242,82 @@ def create_recipe(request):
     }
     return render(request, 'create_recipe.html', context)
 
+
+@login_required
+def edit_recipe(request, slug):
+    try:
+        recipe = Recipe.objects.get(slug=slug)
+        
+        # Check if user owns the recipe
+        if recipe.author.user != request.user:
+            messages.error(request, "You don't have permission to edit this recipe.")
+            return redirect('recipe_detail', slug=slug)
+
+        if request.method == 'POST':
+            form = RecipeForm(request.POST, request.FILES, instance=recipe)
+            if form.is_valid():
+                recipe = form.save(commit=False)
+                recipe.author = UserProfile.objects.get(user=request.user)
+                
+                # Handle tags
+                selected_tags = request.POST.getlist('tags')
+                recipe.tags = ','.join(selected_tags)
+                
+                recipe.save()
+                messages.success(request, 'Recipe updated successfully!')
+                return redirect('recipe_detail', slug=recipe.slug)
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = RecipeForm(instance=recipe)
+
+        context = {
+            'recipe': recipe,
+            'form': form,
+            'all_tags': TAG_CHOICES
+        }
+        return render(request, 'edit_recipe.html', context)
+
+    except Recipe.DoesNotExist:
+        messages.error(request, 'Recipe not found.')
+        return redirect('index')
+
+
+@login_required
+def recipe_detail(request, slug):
+    try:
+        recipe = Recipe.objects.get(slug=slug)
+        
+        # Get related recipes by searching for recipes that share any of the same tags
+        related_recipes = Recipe.objects.filter(
+            tags__contains=recipe.tags
+        ).exclude(slug=slug)[:3]
+        
+        context = {
+            'recipe': recipe,
+            'related_recipes': related_recipes,
+            'tag_choices': TAG_CHOICES
+        }
+        return render(request, 'recipe_detail.html', context)
+    except Recipe.DoesNotExist:
+        messages.error(request, 'Recipe not found.')
+        return redirect('index')
+
+
+@login_required
+def delete_recipe(request, slug):
+    try:
+        recipe = Recipe.objects.get(slug=slug)
+        if recipe.author.user != request.user:
+            messages.error(request, 'You can only delete your own recipes.')
+            return redirect('recipe_detail', slug=slug)
+        
+        if request.method == 'POST':
+            recipe.delete()
+            messages.success(request, 'Recipe has been deleted successfully.')
+            return redirect('index')
+        
+        return render(request, 'recipe_detail.html', {'recipe': recipe})
+    except Recipe.DoesNotExist:
+        messages.error(request, 'Recipe not found.')
+        return redirect('index')
