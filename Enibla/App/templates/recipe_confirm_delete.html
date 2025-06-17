@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Recipe</title>
+</head>
+<body>
+    <h1>Confirm Deletion</h1>
+    <p>Are you sure you want to delete "{{ recipe.title }}"?</p>
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit">Delete</button>
+    </form>
+    <a href="{% url 'recipe_list' %}">Cancel</a>
+</body>
+</html>
