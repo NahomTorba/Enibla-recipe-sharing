@@ -3,3 +3,4 @@ myenv
 __pycache__/
 *.pyc
 *.sqlite3
+*.history
