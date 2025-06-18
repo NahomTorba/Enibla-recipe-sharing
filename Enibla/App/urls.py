@@ -30,7 +30,13 @@ urlpatterns = [
 
     # URLs for recipes
     path('recipes/create/', views.create_recipe, name='create_recipe'),
-    
+   
+    # URLs for recipe editing
+    path('', views.RecipeListView.as_view(), name='recipe_list'),
+    path('recipe/<int:pk>/', views.RecipeDetailView.as_view(), name='recipe_detail'),
+    path('recipe/<int:pk>/edit/', views.RecipeUpdateView.as_view(), name='recipe_update'),
+
+
 ]
 
 
