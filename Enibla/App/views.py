@@ -234,7 +234,7 @@ def create_recipe(request):
             
             recipe.save()
             messages.success(request, 'Recipe shared successfully!')
-            return redirect('recipe_detail', recipe_id=recipe.id)
+            return redirect('recipe_detail', pk=recipe.id)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
