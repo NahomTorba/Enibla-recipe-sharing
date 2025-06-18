@@ -1,5 +1,6 @@
 from django.shortcuts import render,redirect
 from django.contrib import messages
+from django.views.decorators.http import require_http_methods
 from .forms import SignUpForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
@@ -211,7 +212,15 @@ def edit_profile(request):
     return render(request, 'profile/edit_profile.html', context)
     
 
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@require_http_methods(["GET", "POST"])
 def create_recipe(request):
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please login to create recipes.')
+        return redirect('login')
+    
     try:
         profile = UserProfile.objects.get(user=request.user)
     except UserProfile.DoesNotExist:
