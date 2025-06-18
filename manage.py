@@ -4,8 +4,10 @@ import os
 import sys
 import pathlib
 
-# Add project directory to Python path
+# Add project directory to Python path and make it discoverable
 sys.path.append(str(pathlib.Path(__file__).parent))
+import os
+os.environ['PYTHONPATH'] = str(pathlib.Path(__file__).parent)
 
 
 def main():
