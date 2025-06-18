@@ -5,12 +5,12 @@ import sys
 import pathlib
 
 # Add Enibla directory to Python path
-sys.path.append(str(pathlib.Path(__file__).parent))
+sys.path.append(str(pathlib.Path(__file__).parent / 'Enibla'))
 
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Enibla.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Enibla.Enibla.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
