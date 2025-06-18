@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 from django.utils import timezone
+from django.urls import reverse
 
 # Create your models here.
 class UserProfile(models.Model):
@@ -47,3 +48,8 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
+    def get_absolute_url(self):
+        return reverse('recipe_detail', kwargs={'pk': self.pk})
+    
+    def get_update_url(self):
+        return reverse('recipe_update', kwargs={'pk': self.pk})
