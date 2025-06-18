@@ -2,6 +2,10 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import pathlib
+
+# Add src directory to Python path
+sys.path.append(str(pathlib.Path(__file__).parent / 'src'))
 
 
 def main():

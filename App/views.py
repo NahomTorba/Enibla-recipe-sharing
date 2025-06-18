@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 from .forms import SignUpForm
@@ -12,7 +12,11 @@ from .models import UserProfile, Recipe
 from .forms import UserProfileForm, RecipeForm
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
-
+from django.urls import reverse_lazy
+from django.views.generic import UpdateView, DetailView, ListView
+from django.core.exceptions import PermissionDenied
+from .mixins import AuthorRequiredMixin
+from django.shortcuts import get_object_or_404
 # constants
 CUISINE_CHOICES = [ ('Ethiopian', 'Ethiopian'), ('Eritrea', 'Eritrea'), ('African', 'African'), ('Italian', 'Italian'),('Mexican', 'Mexican'),('Chinese', 'Chinese'),('Japanese', 'Japanese'),('Indian', 'Indian'),('French', 'French'),('American', 'American'),('Korean', 'Korean'),('Spanish', 'Spanish'),('Middle Eastern', 'Middle Eastern'),('Brazilian', 'Brazilian'),('British', 'British')]
 TAG_CHOICES = (('breakfast', 'Breakfast'),('lunch', 'Lunch'),('dinner', 'Dinner'),('dessert', 'Dessert'),('snack', 'Snack'),('fasting', 'Fasting'),)
@@ -239,7 +243,7 @@ def create_recipe(request):
             
             recipe.save()
             messages.success(request, 'Recipe shared successfully!')
-            return redirect('recipe_detail', slug=recipe.slug)
+            return redirect('recipe_detail', pk=recipe.id)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -250,6 +254,55 @@ def create_recipe(request):
         'tag_choices': TAG_CHOICES,
     }
     return render(request, 'create_recipe.html', context)
+class RecipeUpdateView(AuthorRequiredMixin, UpdateView):
+    
+    model = Recipe
+    form_class = RecipeForm
+    template_name = 'recipes/recipe_update.html'
+    context_object_name = 'recipe'
+   
+def update_recipe(request, pk):
+   
+    # Get the recipe object or return 404 if not found
+    recipe = get_object_or_404(Recipe, pk=pk)
+    
+    # Check if the current user is the author of the recipe
+    if recipe.author != request.user:
+        messages.error(request, "You don't have permission to edit this recipe.")
+        return redirect('recipe_detail', pk=recipe.pk)
+    
+    
+    def get_success_url(self):
+        messages.success(self.request, 'Recipe updated successfully!')
+        return self.object.get_absolute_url()
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Your recipe has been updated!')
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        messages.error(self.request, 'Please correct the errors below.')
+        return super().form_invalid(form)
+
+class RecipeDetailView(DetailView):
+    """
+    View for displaying recipe details.
+    """
+    model = Recipe
+    template_name = 'recipes/recipe_detail.html'
+    context_object_name = 'recipe'
+
+class RecipeListView(ListView):
+    """
+    View for listing all recipes.
+    """
+    model = Recipe
+    template_name = 'recipes/recipe_list.html'
+    context_object_name = 'recipes'
+    paginate_by = 10
+    
+    def get_queryset(self):
+        return Recipe.objects.select_related('author').all()
 
 
 @login_required
@@ -330,3 +383,55 @@ def delete_recipe(request, slug):
     except Recipe.DoesNotExist:
         messages.error(request, 'Recipe not found.')
         return redirect('index')
+    
+
+#viwes for edit recipe
+@login_required
+def edit_recipe(request, recipe_id):
+    """
+    View to edit an existing recipe
+    """
+    recipe = get_object_or_404(Recipe, id=recipe_id, author=request.user)
+    
+    # Get tag choices (same as in create view)
+    tag_choices = [
+        ('breakfast', 'Breakfast'),
+        ('lunch', 'Lunch'),
+        ('dinner', 'Dinner'),
+        ('dessert', 'Dessert'),
+        ('snack', 'Snack'),
+        ('fasting', 'Fasting'),
+    ]
+    
+    if request.method == 'POST':
+        form = RecipeForm(request.POST, request.FILES, instance=recipe)
+        if form.is_valid():
+            updated_recipe = form.save(commit=False)
+            updated_recipe.author = request.user
+            updated_recipe.save()
+            
+            # Handle tags
+            tags = request.POST.getlist('tags')
+            updated_recipe.tags.clear()
+            for tag in tags:
+                updated_recipe.tags.add(tag)
+            
+            messages.success(request, 'Recipe updated successfully!')
+            return redirect('recipe_detail', recipe_id=updated_recipe.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = RecipeForm(instance=recipe)
+    
+    # Get current recipe tags
+    current_tags = list(recipe.tags.values_list('name', flat=True)) if hasattr(recipe, 'tags') else []
+    
+    context = {
+        'form': form,
+        'recipe': recipe,
+        'tag_choices': tag_choices,
+        'current_tags': current_tags,
+        'is_edit': True
+    }
+    return render(request, 'recipes/edit_recipe.html', context)
+
