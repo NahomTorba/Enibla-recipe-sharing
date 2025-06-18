@@ -141,12 +141,14 @@ def profile_detail(request, username):
     try:
         user = User.objects.get(username=username)
         profile = UserProfile.objects.get(user=user)
+        recipes = Recipe.objects.filter(author=profile).order_by('-created_at')
     except (User.DoesNotExist, UserProfile.DoesNotExist):
         messages.error(request, 'Profile not found.')
         return redirect('home')
     
     context = {
         'profile': profile,
+        'recipes': recipes,
     }
     return render(request, 'profile/profile_detail.html', context)
 
@@ -230,7 +232,7 @@ def create_recipe(request):
             
             recipe.save()
             messages.success(request, 'Recipe shared successfully!')
-            return redirect('recipe_detail', recipe_id=recipe.id)
+            return redirect('profile_detail', username=request.user.username)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:

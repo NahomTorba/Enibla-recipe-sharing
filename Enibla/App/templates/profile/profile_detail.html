@@ -132,25 +132,38 @@
         </div>
 
         <!-- Recent Recipes Section (Placeholder for future features) -->
-        <div class="card">
-            <div class="card-header">
-                <h3><i class="fas fa-utensils"></i> Recent Recipes</h3>
-                <p>Latest recipes shared by {{ profile.user.first_name|default:profile.user.username }}</p>
+        <!-- Recent Recipes Section -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-utensils"></i> Recent Recipes</h3>
+        <p>Latest recipes shared by {{ profile.user.first_name|default:profile.user.username }}</p>
+    </div>
+    <div class="card-content">
+        {% if recipes %}
+            <div class="recipes-list">
+                {% for recipe in recipes %}
+                    <div class="recipe-card">
+                        <h4>{{ recipe.title }}</h4>
+                        <p>{{ recipe.description|truncatechars:100 }}</p>
+                        <a href="#" class="btn btn-sm">View Recipe</a>
+                    </div>
+                {% endfor %}
             </div>
-            <div class="card-content">
-                <div class="empty-state">
-                    <i class="fas fa-utensils empty-icon"></i>
-                    <h4>No recipes yet</h4>
-                    <p>{{ profile.user.first_name|default:profile.user.username }} hasn't shared any recipes yet.</p>
-                    {% if request.user == profile.user %}
-                        <a href="#" class="btn btn-outline">
-                            <i class="fas fa-plus"></i>
-                            Share Your First Recipe
-                        </a>
-                    {% endif %}
-                </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-utensils empty-icon"></i>
+                <h4>No recipes yet</h4>
+                <p>{{ profile.user.first_name|default:profile.user.username }} hasn't shared any recipes yet.</p>
+                {% if request.user == profile.user %}
+                    <a href="{% url 'recipe_create' %}" class="btn btn-outline">
+                        <i class="fas fa-plus"></i>
+                        Share Your First Recipe
+                    </a>
+                {% endif %}
             </div>
-        </div>
+        {% endif %}
+    </div>
+</div>
 
         <!-- Back to Home -->
         <div class="navigation-section">
