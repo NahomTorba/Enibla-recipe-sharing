@@ -1,0 +1,428 @@
+from django.shortcuts import render,redirect, get_object_or_404
+from django.contrib import messages
+from .forms import SignUpForm
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
+from .email_utils import send_confirmation_email
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import UserProfile, Recipe
+from .forms import UserProfileForm, RecipeForm
+from django.contrib.auth.models import User
+from django.contrib.auth import logout
+from django.urls import reverse_lazy
+from django.views.generic import UpdateView, DetailView, ListView
+from django.core.exceptions import PermissionDenied
+from .mixins import AuthorRequiredMixin
+from django.shortcuts import get_object_or_404
+# constants
+CUISINE_CHOICES = [ ('Ethiopian', 'Ethiopian'), ('Eritrea', 'Eritrea'), ('African', 'African'), ('Italian', 'Italian'),('Mexican', 'Mexican'),('Chinese', 'Chinese'),('Japanese', 'Japanese'),('Indian', 'Indian'),('French', 'French'),('American', 'American'),('Korean', 'Korean'),('Spanish', 'Spanish'),('Middle Eastern', 'Middle Eastern'),('Brazilian', 'Brazilian'),('British', 'British')]
+TAG_CHOICES = (('breakfast', 'Breakfast'),('lunch', 'Lunch'),('dinner', 'Dinner'),('dessert', 'Dessert'),('snack', 'Snack'),('fasting', 'Fasting'),)
+
+
+# Create your views here.
+def signup(request):
+    if request.user.is_authenticated:
+        return redirect('index')
+    
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Send confirmation email
+            send_confirmation_email(user)
+            # Display success message
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Account created for {username}! You can now log in.')
+            
+            # Automatically log in the user
+            user = authenticate(username=username, password=form.cleaned_data.get('password1'))
+            if user:
+                login(request, user)
+                messages.success(request, 'Welcome to Enibla! Please create your profile to get started.')
+                return redirect('index')
+            else:
+                return redirect('login')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = SignUpForm()
+    
+    context = {
+        'form': form,
+    }
+    return render(request, 'auth/signup.html', context)
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('index')
+    
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Welcome back, {user.first_name if user.first_name else username}!')
+                
+                # Redirect to the next page if provided, otherwise to profile
+                next_page = request.POST.get('next')
+                if next_page:
+                    return redirect(next_page)
+                return redirect('index')
+            else:
+                messages.error(request, 'Invalid username or password.')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = AuthenticationForm()
+    
+    context = {
+        'form': form,
+    }
+    return render(request, 'auth/login.html', context)
+
+@login_required
+def logout_view(request):
+    user_name = request.user.first_name if request.user.first_name else request.user.username
+    logout(request)
+    messages.success(request, f'Goodbye {user_name}! You have been logged out successfully.')
+    return redirect('login')
+
+def index(request):
+    """Home page view with featured recipes and stats"""
+    # Get featured recipes (latest 6)
+    featured_recipes = Recipe.objects.select_related('author__user').order_by('-created_at')[:6]
+    
+    # Get community stats
+    total_recipes = Recipe.objects.count()
+    total_users = User.objects.count()
+    total_cuisines = len(CUISINE_CHOICES)
+    total_favorites = 0  # Placeholder for when favorites are implemented
+    
+    context = {
+        'featured_recipes': featured_recipes,
+        'total_recipes': total_recipes,
+        'total_users': total_users,
+        'total_cuisines': total_cuisines,
+        'total_favorites': total_favorites,
+    }
+    return render(request, 'home.html', context)
+
+
+@login_required
+def profile_create(request):
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.user = request.user
+
+            favorite_cuisines = request.POST.getlist('favorite_cuisines')
+            profile.favorite_cuisines = ','.join(favorite_cuisines)
+
+            profile.save()
+            messages.success(request, 'Profile created successfully!')
+            return redirect('profile_detail', username=request.user.username)
+        else:
+            messages.error(request, 'Please correct the errors!')
+    else:
+        # Pass the existing profile to the form here as well!
+        form = UserProfileForm(instance=profile)
+
+    context = {
+        'form': form,
+        'cuisines': UserProfile.CUISINE_CHOICES,
+    }
+    return render(request, 'profile/Create_Profile.html', context)
+
+def profile_detail(request, username):
+    try:
+        user = User.objects.get(username=username)
+        profile = UserProfile.objects.get(user=user)
+    except (User.DoesNotExist, UserProfile.DoesNotExist):
+        messages.error(request, 'Profile not found.')
+        return redirect('home')
+    
+    context = {
+        'profile': profile,
+    }
+    return render(request, 'profile/profile_detail.html', context)
+
+def my_profile(request):
+    """Redirect to current user's profile"""
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        return redirect('profile_detail', username=request.user.username)
+    except UserProfile.DoesNotExist:
+        return redirect('create_profile')
+    
+def edit_profile(request):
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+    except UserProfile.DoesNotExist:
+        return redirect('create_profile')
+    
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            
+            # Handle favorite cuisines
+            favorite_cuisines = request.POST.getlist('favorite_cuisines')
+            profile.favorite_cuisines = ','.join(favorite_cuisines)
+            
+            # Handle image removal
+            if request.POST.get('remove_image'):
+                profile.profile_image.delete()
+                profile.profile_image = None
+            
+            profile.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('profile_detail', username=request.user.username)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        # Create form with initial data
+        initial_data = {
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'username': request.user.username,
+            'email': request.user.email,
+        }
+        form = UserProfileForm(instance=profile, initial=initial_data)
+    
+    # Pre-populate favorite cuisines
+    if profile.favorite_cuisines:
+        selected_cuisines = [cuisine.strip() for cuisine in profile.favorite_cuisines.split(',') if cuisine.strip()]
+    else:
+        selected_cuisines = []
+    
+    context = {
+        'form': form,
+        'profile': profile,
+        'cuisines': CUISINE_CHOICES,
+        'selected_cuisines': selected_cuisines,
+    }
+    return render(request, 'profile/edit_profile.html', context)
+    
+
+def create_recipe(request):
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'Please create your profile first before sharing recipes.')
+        return redirect('create_profile')
+    
+    if request.method == 'POST':
+        form = RecipeForm(request.POST, request.FILES)
+        if form.is_valid():
+            recipe = form.save(commit=False)
+            recipe.author = profile
+            
+            # Handle tags
+            selected_tags = request.POST.getlist('tags')
+            recipe.tags = ','.join(selected_tags)
+            
+            recipe.save()
+            messages.success(request, 'Recipe shared successfully!')
+            return redirect('recipe_detail', pk=recipe.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = RecipeForm()
+    
+    context = {
+        'form': form,
+        'tag_choices': TAG_CHOICES,
+    }
+    return render(request, 'create_recipe.html', context)
+class RecipeUpdateView(AuthorRequiredMixin, UpdateView):
+    
+    model = Recipe
+    form_class = RecipeForm
+    template_name = 'recipes/recipe_update.html'
+    context_object_name = 'recipe'
+   
+def update_recipe(request, pk):
+   
+    # Get the recipe object or return 404 if not found
+    recipe = get_object_or_404(Recipe, pk=pk)
+    
+    # Check if the current user is the author of the recipe
+    if recipe.author != request.user:
+        messages.error(request, "You don't have permission to edit this recipe.")
+        return redirect('recipe_detail', pk=recipe.pk)
+    
+    
+    def get_success_url(self):
+        messages.success(self.request, 'Recipe updated successfully!')
+        return self.object.get_absolute_url()
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Your recipe has been updated!')
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        messages.error(self.request, 'Please correct the errors below.')
+        return super().form_invalid(form)
+
+class RecipeDetailView(DetailView):
+    """
+    View for displaying recipe details.
+    """
+    model = Recipe
+    template_name = 'recipes/recipe_detail.html'
+    context_object_name = 'recipe'
+
+class RecipeListView(ListView):
+    """
+    View for listing all recipes.
+    """
+    model = Recipe
+    template_name = 'recipes/recipe_list.html'
+    context_object_name = 'recipes'
+    paginate_by = 10
+    
+    def get_queryset(self):
+        return Recipe.objects.select_related('author').all()
+
+
+@login_required
+def edit_recipe(request, slug):
+    try:
+        recipe = Recipe.objects.get(slug=slug)
+        
+        # Check if user owns the recipe
+        if recipe.author.user != request.user:
+            messages.error(request, "You don't have permission to edit this recipe.")
+            return redirect('recipe_detail', slug=slug)
+
+        if request.method == 'POST':
+            form = RecipeForm(request.POST, request.FILES, instance=recipe)
+            if form.is_valid():
+                recipe = form.save(commit=False)
+                recipe.author = UserProfile.objects.get(user=request.user)
+                
+                # Handle tags
+                selected_tags = request.POST.getlist('tags')
+                recipe.tags = ','.join(selected_tags)
+                
+                recipe.save()
+                messages.success(request, 'Recipe updated successfully!')
+                return redirect('recipe_detail', slug=recipe.slug)
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = RecipeForm(instance=recipe)
+
+        context = {
+            'recipe': recipe,
+            'form': form,
+            'all_tags': TAG_CHOICES
+        }
+        return render(request, 'edit_recipe.html', context)
+
+    except Recipe.DoesNotExist:
+        messages.error(request, 'Recipe not found.')
+        return redirect('index')
+
+
+@login_required
+def recipe_detail(request, slug):
+    try:
+        recipe = Recipe.objects.get(slug=slug)
+        
+        # Get related recipes by searching for recipes that share any of the same tags
+        related_recipes = Recipe.objects.filter(
+            tags__contains=recipe.tags
+        ).exclude(slug=slug)[:3]
+        
+        context = {
+            'recipe': recipe,
+            'related_recipes': related_recipes,
+            'tag_choices': TAG_CHOICES
+        }
+        return render(request, 'recipe_detail.html', context)
+    except Recipe.DoesNotExist:
+        messages.error(request, 'Recipe not found.')
+        return redirect('index')
+
+
+@login_required
+def delete_recipe(request, slug):
+    try:
+        recipe = Recipe.objects.get(slug=slug)
+        if recipe.author.user != request.user:
+            messages.error(request, 'You can only delete your own recipes.')
+            return redirect('recipe_detail', slug=slug)
+        
+        if request.method == 'POST':
+            recipe.delete()
+            messages.success(request, 'Recipe has been deleted successfully.')
+            return redirect('index')
+        
+        return render(request, 'recipe_detail.html', {'recipe': recipe})
+    except Recipe.DoesNotExist:
+        messages.error(request, 'Recipe not found.')
+        return redirect('index')
+    
+
+#viwes for edit recipe
+@login_required
+def edit_recipe(request, recipe_id):
+    """
+    View to edit an existing recipe
+    """
+    recipe = get_object_or_404(Recipe, id=recipe_id, author=request.user)
+    
+    # Get tag choices (same as in create view)
+    tag_choices = [
+        ('breakfast', 'Breakfast'),
+        ('lunch', 'Lunch'),
+        ('dinner', 'Dinner'),
+        ('dessert', 'Dessert'),
+        ('snack', 'Snack'),
+        ('fasting', 'Fasting'),
+    ]
+    
+    if request.method == 'POST':
+        form = RecipeForm(request.POST, request.FILES, instance=recipe)
+        if form.is_valid():
+            updated_recipe = form.save(commit=False)
+            updated_recipe.author = request.user
+            updated_recipe.save()
+            
+            # Handle tags
+            tags = request.POST.getlist('tags')
+            updated_recipe.tags.clear()
+            for tag in tags:
+                updated_recipe.tags.add(tag)
+            
+            messages.success(request, 'Recipe updated successfully!')
+            return redirect('recipe_detail', recipe_id=updated_recipe.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = RecipeForm(instance=recipe)
+    
+    # Get current recipe tags
+    current_tags = list(recipe.tags.values_list('name', flat=True)) if hasattr(recipe, 'tags') else []
+    
+    context = {
+        'form': form,
+        'recipe': recipe,
+        'tag_choices': tag_choices,
+        'current_tags': current_tags,
+        'is_edit': True
+    }
+    return render(request, 'recipes/edit_recipe.html', context)
+
