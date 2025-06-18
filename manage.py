@@ -4,10 +4,11 @@ import os
 import sys
 import pathlib
 
-# Add project directory to Python path and make it discoverable
+# Add project directory to Python path
 sys.path.append(str(pathlib.Path(__file__).parent))
-import os
-os.environ['PYTHONPATH'] = str(pathlib.Path(__file__).parent)
+
+# Add Enibla package to Python path
+sys.path.append(str(pathlib.Path(__file__).parent / 'Enibla'))
 
 
 def main():
