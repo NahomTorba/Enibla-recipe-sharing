@@ -43,3 +43,10 @@ def duration_to_string(duration):
         parts.append(f"{minutes} minute{'s' if minutes > 1 else ''}")
     
     return " ".join(parts)
+
+@register.filter
+def split_tags(tags):
+    """Split comma-separated tags into a list"""
+    if not tags:
+        return []
+    return [tag.strip() for tag in tags.split(',')]
