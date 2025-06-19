@@ -258,7 +258,7 @@ class RecipeListView(ListView):
         """
         Return all active recipes ordered by creation date (most recent first)
         """
-        return Recipe.objects.filter(is_active=True).order_by('-created_at')
+        return Recipe.objects.all().order_by('-created_at')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -270,7 +270,7 @@ def recipe_list_view(request):
     """
     Function-based view alternative for recipe list
     """
-    recipes = Recipe.objects.filter(is_active=True).order_by('-created_at')
+    recipes = Recipe.objects.all().order_by('-created_at')
     
     # Pagination
     paginator = Paginator(recipes, 12)  # Show 12 recipes per page

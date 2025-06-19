@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import RecipeListView
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
@@ -30,8 +31,7 @@ urlpatterns = [
 
     # URLs for recipes
     path('recipes/create/', views.create_recipe, name='create_recipe'),
-    path('recipe_list', views.RecipeListView, name='recipe_list')
-    
+    path('recipes/', RecipeListView.as_view(), name='recipe_list')     
 ]
 
 
