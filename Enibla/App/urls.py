@@ -30,6 +30,7 @@ urlpatterns = [
 
     # URLs for recipes
     path('recipes/create/', views.create_recipe, name='create_recipe'),
+    path('recipe_list', views.RecipeListView, name='recipe_list')
     
 ]
 

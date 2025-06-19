@@ -12,6 +12,9 @@ from .forms import UserProfileForm, RecipeForm
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 
+from django.views.generic import ListView
+from django.core.paginator import Paginator
+
 # constants
 CUISINE_CHOICES = [ ('Ethiopian', 'Ethiopian'), ('Eritrea', 'Eritrea'), ('African', 'African'), ('Italian', 'Italian'),('Mexican', 'Mexican'),('Chinese', 'Chinese'),('Japanese', 'Japanese'),('Indian', 'Indian'),('French', 'French'),('American', 'American'),('Korean', 'Korean'),('Spanish', 'Spanish'),('Middle Eastern', 'Middle Eastern'),('Brazilian', 'Brazilian'),('British', 'British')]
 TAG_CHOICES = (('breakfast', 'Breakfast'),('lunch', 'Lunch'),('dinner', 'Dinner'),('dessert', 'Dessert'),('snack', 'Snack'),('fasting', 'Fasting'),)
@@ -244,3 +247,41 @@ def create_recipe(request):
     }
     return render(request, 'create_recipe.html', context)
 
+
+class RecipeListView(ListView):
+    model = Recipe
+    template_name = 'recipes/recipe_list.html'
+    context_object_name = 'recipes'
+    paginate_by = 12  # Show 12 recipes per page
+    
+    def get_queryset(self):
+        """
+        Return all active recipes ordered by creation date (most recent first)
+        """
+        return Recipe.objects.filter(is_active=True).order_by('-created_at')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_recipes'] = self.get_queryset().count()
+        return context
+
+# Alternative function-based view (if you prefer)
+def recipe_list_view(request):
+    """
+    Function-based view alternative for recipe list
+    """
+    recipes = Recipe.objects.filter(is_active=True).order_by('-created_at')
+    
+    # Pagination
+    paginator = Paginator(recipes, 12)  # Show 12 recipes per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'recipes': page_obj,
+        'total_recipes': recipes.count(),
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
+    }
+    
+    return render(request, 'recipes/recipe_list.html', context)
