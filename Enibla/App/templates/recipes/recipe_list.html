@@ -4,55 +4,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Recipes - Recipe Collection</title>
-    {% load static %}
+    <title>All Recipes - Enibla Recipe Sharing</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/recipe_list.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <header class="header">
-        <div class="container">
-            <nav class="navbar">
-                <div class="nav-brand">
-                    <h1><a href="{% url 'recipe_list' %}">Recipe Collection</a></h1>
-                </div>
-                <div class="nav-links">
-                    <a href="{% url 'recipe_list' %}" class="nav-link">All Recipes</a>
-                </div>
-            </nav>
-        </div>
-    </header>
-
-    <main class="main-content">
-        <div class="container">
-            <div class="recipe-list-header">
-                <h2>All Recipes</h2>
-                <p class="recipe-count">{{ total_recipes }} recipe{{ total_recipes|pluralize }} found</p>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Logo -->
+            <div class="nav-logo">
+                <a href="{% url 'index' %}" class="logo-link">
+                    <i class="fas fa-utensils"></i>
+                    <span>Enibla</span>
+                </a>
             </div>
 
-            {% if recipes %}
-                <div class="recipe-grid" id="recipeGrid">
-                    {% for recipe in recipes %}
-                        <div class="recipe-card" data-recipe-id="{{ recipe.id }}">
-                            <div class="recipe-image">
-                                <img src="{{ recipe.get_thumbnail_url }}" alt="{{ recipe.title }}" loading="lazy">
-                                <div class="recipe-overlay">
-                                    <div class="recipe-time">
-                                        <span class="time-badge">{{ recipe.get_total_time }} min</span>
+            <!-- Search Bar -->
+            <div class="nav-search">
+                <form class="search-form" method="get" action="#">
+                    <div class="search-input-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" name="q" placeholder="Search recipes, ingredients, or cuisines..." class="search-input" value="{{ request.GET.q|default:'' }}">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="nav-links">
+                <a href="{% url 'recipe_list' %}" class="nav-link">
+                    <i class="fas fa-utensils"></i>
+                    <span>Recipes</span>
+                </a>
+                
+                {% if user.is_authenticated %}
+                    <a href="{% url 'create_recipe' %}" class="nav-link nav-link-primary">
+                        <i class="fas fa-plus"></i>
+                        <span>Share Recipe</span>
+                    </a>
+                    
+                    <!-- Profile Dropdown -->
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <button class="profile-btn" id="profileBtn">
+                            {% if user.userprofile.profile_image %}
+                                <img src="{{ user.userprofile.profile_image.url }}" alt="Profile" class="profile-avatar">
+                            {% else %}
+                                <div class="profile-avatar profile-avatar-placeholder">
+                                    {% if user.first_name %}
+                                        <span class="avatar-initial">{{ user.first_name.0|upper }}</span>
+                                    {% else %}
+                                        <i class="fas fa-user"></i>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info">
+                                    {% if user.userprofile.profile_image %}
+                                        <img src="{{ user.userprofile.profile_image.url }}" alt="Profile" class="user-avatar">
+                                    {% else %}
+                                        <div class="user-avatar user-avatar-placeholder">
+                                            {% if user.first_name %}
+                                                <span class="user-avatar-initial">{{ user.first_name.0|upper }}</span>
+                                            {% else %}
+                                                <i class="fas fa-user"></i>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="user-details">
+                                        <h4>{{ user.get_full_name|default:user.username }}</h4>
+                                        <p>{{ user.email }}</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="recipe-content">
-                                <h3 class="recipe-title">
-                                    <a href="{{ recipe.get_absolute_url }}">{{ recipe.title }}</a>
-                                </h3>
-                                <p class="recipe-description">{{ recipe.short_description|truncatewords:20 }}</p>
-                                <div class="recipe-meta">
-                                    <span class="servings">Serves {{ recipe.servings }}</span>
-                                    <span class="date">{{ recipe.created_at|date:"M d, Y" }}</span>
-                                </div>
-                            </div>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <a href="{% url 'my_profile' %}" class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span>My Profile</span>
+                            </a>
+                            
+                            <a href="{% url 'create_recipe' %}" class="dropdown-item">
+                                <i class="fas fa-plus"></i>
+                                <span>Share Recipe</span>
+                            </a>
+                            
+                            <a href="{% url 'edit_profile' %}" class="dropdown-item">
+                                <i class="fas fa-edit"></i>
+                                <span>Edit Profile</span>
+                            </a>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <a href="{% url 'logout' %}" class="dropdown-item dropdown-item-logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Log Out</span>
+                            </a>
                         </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Log In</span>
+                    </a>
+                    <a href="{% url 'signup' %}" class="nav-link nav-link-primary">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Sign Up</span>
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="{% url 'index' %}">
+                        <i class="fas fa-home"></i>
+                        Home
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-current">All Recipes</span>
+                </div>
+                
+                <div class="recipe-list-header">
+                    <h1>Discover Amazing Recipes</h1>
+                    <p class="recipe-count">
+                        <i class="fas fa-utensils"></i>
+                        {{ total_recipes }} delicious recipe{{ total_recipes|pluralize }} waiting for you
+                    </p>
+                </div>
+
+                <!-- Search and Filter Section -->
+                <div class="search-filter-section">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="recipeSearch" placeholder="Search recipes, ingredients, or cuisines...">
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">
+                            <i class="fas fa-th"></i>
+                            All
+                        </button>
+                        <button class="filter-btn" data-filter="breakfast">
+                            <i class="fas fa-coffee"></i>
+                            Breakfast
+                        </button>
+                        <button class="filter-btn" data-filter="lunch">
+                            <i class="fas fa-hamburger"></i>
+                            Lunch
+                        </button>
+                        <button class="filter-btn" data-filter="dinner">
+                            <i class="fas fa-drumstick-bite"></i>
+                            Dinner
+                        </button>
+                        <button class="filter-btn" data-filter="dessert">
+                            <i class="fas fa-ice-cream"></i>
+                            Dessert
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recipe Grid -->
+            {% if recipes %}
+                <div class="recipe-grid" id="recipeGrid">
+                    {% for recipe in recipes %}
+                        <div class="recipe-card">
+                        <div class="recipe-image">
+                            {% if recipe.image %}
+                                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+                            {% else %}
+                                <div class="recipe-placeholder">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                            {% endif %}
+                            {% if recipe.tags %}
+                                <div class="recipe-tags">
+                                    {% for tag in recipe.get_tag_choices_list %}
+                                        <span class="recipe-tag">{{ tag|title }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="recipe-content">
+                            <h3 class="recipe-title">{{ recipe.title }}</h3>
+                            <p class="recipe-description">{{ recipe.description|truncatewords:15 }}</p>
+                            
+                            <div class="recipe-meta">
+                                <div class="recipe-author">
+                                    {% if recipe.author.profile_image %}
+                                        <img src="{{ recipe.author.profile_image.url }}" alt="{{ recipe.author.user.get_full_name|default:recipe.author.user.username }}" class="author-avatar">
+                                    {% else %}
+                                        <div class="author-avatar author-avatar-placeholder">
+                                            {% if recipe.author.user.first_name %}
+                                                <span class="author-initial">{{ recipe.author.user.first_name.0|upper }}</span>
+                                            {% else %}
+                                                <i class="fas fa-user"></i>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                    <span class="author-name">{{ recipe.author.user.get_full_name|default:recipe.author.user.username }}</span>
+                                </div>
+                                <span class="recipe-date">{{ recipe.created_at|timesince }} ago</span>
+                            </div>
+                            
+                            <a href="#" class="recipe-link">
+                                View Recipe <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
                     {% endfor %}
                 </div>
 
@@ -61,8 +240,12 @@
                     <div class="pagination-wrapper">
                         <nav class="pagination" aria-label="Recipe pagination">
                             {% if page_obj.has_previous %}
-                                <a href="?page=1" class="pagination-link" aria-label="First page">&laquo;&laquo;</a>
-                                <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link" aria-label="Previous page">&laquo;</a>
+                                <a href="?page=1" class="pagination-link" aria-label="First page">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                                <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link" aria-label="Previous page">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
                             {% endif %}
 
                             {% for num in page_obj.paginator.page_range %}
@@ -74,8 +257,12 @@
                             {% endfor %}
 
                             {% if page_obj.has_next %}
-                                <a href="?page={{ page_obj.next_page_number }}" class="pagination-link" aria-label="Next page">&raquo;</a>
-                                <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-link" aria-label="Last page">&raquo;&raquo;</a>
+                                <a href="?page={{ page_obj.next_page_number }}" class="pagination-link" aria-label="Next page">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                                <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-link" aria-label="Last page">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
                             {% endif %}
                         </nav>
                         
@@ -89,20 +276,29 @@
                 {% endif %}
             {% else %}
                 <div class="empty-state">
-                    <div class="empty-icon">🍳</div>
+                    <div class="empty-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
                     <h3>No recipes found</h3>
-                    <p>Start by adding your first recipe to the collection.</p>
+                    <p>Be the first to share a delicious recipe with the Enibla community!</p>
+                    <a href="{% url 'create_recipe' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Add Your First Recipe
+                    </a>
                 </div>
             {% endif %}
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2024 Recipe Collection. All rights reserved.</p>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading recipes...</p>
         </div>
-    </footer>
+    </div>
 
+    <script src="{% static 'js/home.js' %}"></script>
     <script src="{% static 'js/recipe_list.js' %}"></script>
 </body>
 </html>

@@ -2,12 +2,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Initialize recipe list functionality
   initializeRecipeList()
-
-  // Add smooth scrolling for pagination
+  initializeSearch()
+  initializeFilters()
   initializePagination()
-
-  // Add loading states
-  initializeLoadingStates()
+  initializeSaveButtons()
 })
 
 function initializeRecipeList() {
@@ -16,8 +14,8 @@ function initializeRecipeList() {
   // Add click handlers for recipe cards
   recipeCards.forEach((card) => {
     card.addEventListener("click", (e) => {
-      // Don't trigger if clicking on a link
-      if (e.target.tagName === "A") return
+      // Don't trigger if clicking on action buttons or links
+      if (e.target.closest(".action-btn") || e.target.tagName === "A") return
 
       const link = card.querySelector(".recipe-title a")
       if (link) {
@@ -43,6 +41,84 @@ function initializeRecipeList() {
   })
 }
 
+function initializeSearch() {
+  const searchInput = document.getElementById("recipeSearch")
+  if (searchInput) {
+    const debouncedSearch = debounce(performSearch, 300)
+    searchInput.addEventListener("input", debouncedSearch)
+  }
+}
+
+function performSearch(event) {
+  const query = event.target.value.toLowerCase()
+  const recipeCards = document.querySelectorAll(".recipe-card")
+  let visibleCount = 0
+
+  recipeCards.forEach((card) => {
+    const title = card.querySelector(".recipe-title a").textContent.toLowerCase()
+    const description = card.querySelector(".recipe-description").textContent.toLowerCase()
+    const tags = card.dataset.tags ? card.dataset.tags.toLowerCase() : ""
+
+    if (title.includes(query) || description.includes(query) || tags.includes(query)) {
+      card.style.display = "block"
+      visibleCount++
+    } else {
+      card.style.display = "none"
+    }
+  })
+
+  // Update recipe count
+  updateRecipeCount(visibleCount)
+}
+
+function initializeFilters() {
+  const filterButtons = document.querySelectorAll(".filter-btn")
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      // Remove active class from all buttons
+      filterButtons.forEach((btn) => btn.classList.remove("active"))
+
+      // Add active class to clicked button
+      button.classList.add("active")
+
+      // Filter recipes
+      const filter = button.dataset.filter
+      filterRecipes(filter)
+    })
+  })
+}
+
+function filterRecipes(filter) {
+  const recipeCards = document.querySelectorAll(".recipe-card")
+  let visibleCount = 0
+
+  recipeCards.forEach((card) => {
+    const tags = card.dataset.tags ? card.dataset.tags.toLowerCase() : ""
+
+    if (filter === "all" || tags.includes(filter)) {
+      card.style.display = "block"
+      visibleCount++
+    } else {
+      card.style.display = "none"
+    }
+  })
+
+  // Update recipe count
+  updateRecipeCount(visibleCount)
+}
+
+function updateRecipeCount(count) {
+  const recipeCountElement = document.querySelector(".recipe-count")
+  if (recipeCountElement) {
+    const plural = count !== 1 ? "s" : ""
+    recipeCountElement.innerHTML = `
+            <i class="fas fa-utensils"></i>
+            ${count} delicious recipe${plural} ${count === 0 ? "found" : "waiting for you"}
+        `
+  }
+}
+
 function initializePagination() {
   const paginationLinks = document.querySelectorAll(".pagination-link")
 
@@ -57,76 +133,136 @@ function initializePagination() {
   })
 }
 
-function initializeLoadingStates() {
-  // Add intersection observer for lazy loading images
-  if ("IntersectionObserver" in window) {
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const img = entry.target
-          if (img.dataset.src) {
-            img.src = img.dataset.src
-            img.removeAttribute("data-src")
-            observer.unobserve(img)
-          }
-        }
-      })
-    })
+function initializeSaveButtons() {
+  const saveButtons = document.querySelectorAll(".save-btn")
 
-    const lazyImages = document.querySelectorAll("img[data-src]")
-    lazyImages.forEach((img) => imageObserver.observe(img))
-  }
+  saveButtons.forEach((button) => {
+    button.addEventListener("click", async (e) => {
+      e.stopPropagation()
+
+      const recipeId = button.dataset.recipeId
+      const icon = button.querySelector("i")
+
+      try {
+        const response = await fetch(`/recipes/${recipeId}/toggle-save/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "Content-Type": "application/json",
+          },
+        })
+
+        const data = await response.json()
+
+        if (data.success) {
+          if (data.saved) {
+            icon.classList.remove("far")
+            icon.classList.add("fas")
+            button.style.background = "#ff6b35"
+            button.style.color = "white"
+          } else {
+            icon.classList.remove("fas")
+            icon.classList.add("far")
+            button.style.background = "rgba(255, 255, 255, 0.9)"
+            button.style.color = "#ff6b35"
+          }
+
+          // Show success message
+          showToast(data.message, "success")
+        } else {
+          showToast(data.message || "An error occurred", "error")
+        }
+      } catch (error) {
+        console.error("Error:", error)
+        showToast("An error occurred while saving the recipe", "error")
+      }
+    })
+  })
 }
 
 function showLoadingState() {
-  // Create loading overlay
-  const loadingOverlay = document.createElement("div")
-  loadingOverlay.className = "loading-overlay"
-  loadingOverlay.innerHTML = `
-        <div class="loading-spinner">
-            <div class="spinner"></div>
-            <p>Loading recipes...</p>
+  const loadingOverlay = document.getElementById("loadingOverlay")
+  if (loadingOverlay) {
+    loadingOverlay.style.display = "flex"
+  }
+}
+
+function hideLoadingState() {
+  const loadingOverlay = document.getElementById("loadingOverlay")
+  if (loadingOverlay) {
+    loadingOverlay.style.display = "none"
+  }
+}
+
+function showToast(message, type = "info") {
+  // Create toast element
+  const toast = document.createElement("div")
+  toast.className = `toast toast-${type}`
+  toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fas ${type === "success" ? "fa-check-circle" : "fa-exclamation-circle"}"></i>
+            <span>${message}</span>
         </div>
     `
 
-  // Add loading styles
+  // Add toast styles
   const style = document.createElement("style")
   style.textContent = `
-        .loading-overlay {
+        .toast {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.8);
+            top: 100px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: slideInRight 0.3s ease-out;
+            border-left: 4px solid #ff6b35;
+        }
+        
+        .toast-success {
+            border-left-color: #10b981;
+        }
+        
+        .toast-error {
+            border-left-color: #ef4444;
+        }
+        
+        .toast-content {
             display: flex;
             align-items: center;
-            justify-content: center;
-            z-index: 1000;
+            gap: 0.5rem;
         }
         
-        .loading-spinner {
-            text-align: center;
+        .toast-success .toast-content i {
+            color: #10b981;
         }
         
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #2563eb;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
+        .toast-error .toast-content i {
+            color: #ef4444;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
     `
 
   document.head.appendChild(style)
-  document.body.appendChild(loadingOverlay)
+  document.body.appendChild(toast)
+
+  // Remove toast after 3 seconds
+  setTimeout(() => {
+    toast.remove()
+    style.remove()
+  }, 3000)
 }
 
 // Utility functions
@@ -142,35 +278,27 @@ function debounce(func, wait) {
   }
 }
 
-// Add search functionality (if needed in future)
-function initializeSearch() {
-  const searchInput = document.getElementById("recipe-search")
-  if (searchInput) {
-    const debouncedSearch = debounce(performSearch, 300)
-    searchInput.addEventListener("input", debouncedSearch)
-  }
-}
-
-function performSearch(event) {
-  const query = event.target.value.toLowerCase()
-  const recipeCards = document.querySelectorAll(".recipe-card")
-
-  recipeCards.forEach((card) => {
-    const title = card.querySelector(".recipe-title a").textContent.toLowerCase()
-    const description = card.querySelector(".recipe-description").textContent.toLowerCase()
-
-    if (title.includes(query) || description.includes(query)) {
-      card.style.display = "block"
-    } else {
-      card.style.display = "none"
+function getCookie(name) {
+  let cookieValue = null
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";")
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim()
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
+        break
+      }
     }
-  })
+  }
+  return cookieValue
 }
 
 // Export functions for potential use in other scripts
 window.RecipeList = {
   initializeRecipeList,
-  initializePagination,
+  initializeSearch,
+  initializeFilters,
   showLoadingState,
+  hideLoadingState,
   debounce,
 }
