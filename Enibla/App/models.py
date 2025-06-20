@@ -1,7 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator,MinValueValidator, MaxValueValidator
 from django.utils import timezone
+from django.urls import reverse
+from PIL import Image
+import os
 
 # Create your models here.
 class UserProfile(models.Model):
@@ -31,19 +34,82 @@ class Recipe(models.Model):
     description = models.TextField()
     ingredients = models.TextField()
     instructions = models.TextField()
-    TAG_CHOICES = (('breakfast', 'Breakfast'),('lunch', 'Lunch'),('dinner', 'Dinner'),('dessert', 'Dessert'),('snack', 'Snack'),('fasting', 'Fasting'),)
-    tags = models.CharField (max_length=100, blank=True)
-    image = models.ImageField(upload_to='recipe_images/', blank=True, null=True, validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])])
+    TAG_CHOICES = (
+        ('breakfast', 'Breakfast'),
+        ('lunch', 'Lunch'),
+        ('dinner', 'Dinner'),
+        ('dessert', 'Dessert'),
+        ('snack', 'Snack'),
+        ('fasting', 'Fasting'),
+    )
+    tags = models.CharField(max_length=100, blank=True)
+    image = models.ImageField(
+        upload_to='recipe_images/', 
+        blank=True, 
+        null=True, 
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])]
+    )
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.title
     
+    def get_absolute_url(self):
+        return reverse('recipe_detail', kwargs={'pk': self.pk})
+    
     def get_tag_choices_list(self):
         if self.tags:
-            return self.tags.split(',')
-        return[]
+            return [tag.strip() for tag in self.tags.split(',')]
+        return []
+    
+    @property
+    def average_rating(self):
+        reviews = self.reviews.all()
+        if reviews:
+            return sum([review.rating for review in reviews]) / len(reviews)
+        return 0
+    
+    def save(self, *args, **kwargs):
+        self.updated_at = timezone.now()
+        super().save(*args, **kwargs)
+        
+        # Resize image if it exists
+        if self.image:
+            img = Image.open(self.image.path)
+            if img.height > 800 or img.width > 800:
+                output_size = (800, 800)
+                img.thumbnail(output_size)
+                img.save(self.image.path)
+    
     class Meta:
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
+        ordering = ['-created_at']
+
+class Review(models.Model):
+    recipe = models.ForeignKey(Recipe, related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.recipe.title} ({self.rating}/5)"
+    
+    class Meta:
+        unique_together = ['recipe', 'user']
+        ordering = ['-created_at']
+
+class SavedRecipe(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    saved_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.username} saved {self.recipe.title}"
+    
+    class Meta:
+        unique_together = ['user', 'recipe']
+        ordering = ['-saved_at']
+        

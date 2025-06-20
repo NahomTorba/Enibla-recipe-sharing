@@ -1,16 +1,19 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404, redirect
 from django.contrib import messages
-from .forms import SignUpForm
+from .forms import SignUpForm,ReviewForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from .email_utils import send_confirmation_email
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import UserProfile, Recipe
+from .models import UserProfile, Recipe,Review,SavedRecipe
 from .forms import UserProfileForm, RecipeForm
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
+from django.http import JsonResponse
+from django.db.models import Avg, Q
+from django.views.decorators.http import require_POST
 
 # constants
 CUISINE_CHOICES = [ ('Ethiopian', 'Ethiopian'), ('Eritrea', 'Eritrea'), ('African', 'African'), ('Italian', 'Italian'),('Mexican', 'Mexican'),('Chinese', 'Chinese'),('Japanese', 'Japanese'),('Indian', 'Indian'),('French', 'French'),('American', 'American'),('Korean', 'Korean'),('Spanish', 'Spanish'),('Middle Eastern', 'Middle Eastern'),('Brazilian', 'Brazilian'),('British', 'British')]
@@ -244,3 +247,83 @@ def create_recipe(request):
     }
     return render(request, 'create_recipe.html', context)
 
+def recipe_detail(request, pk):
+    """Display detailed view of a single recipe"""
+    recipe = get_object_or_404(Recipe, pk=pk)
+    
+    # Calculate average rating
+    recipe.average_rating = recipe.reviews.aggregate(
+        avg_rating=Avg('rating')
+    )['avg_rating'] or 0
+    
+    # Get related recipes (same tags or author)
+    related_recipes = Recipe.objects.filter(
+        Q(tags__icontains=recipe.tags) | Q(author=recipe.author)
+    ).exclude(pk=recipe.pk).distinct()[:4]
+    
+    # Check if user has saved this recipe
+    is_saved = False
+    if request.user.is_authenticated:
+        is_saved = SavedRecipe.objects.filter(
+            user=request.user, 
+            recipe=recipe
+        ).exists()
+    
+    context = {
+        'recipe': recipe,
+        'related_recipes': related_recipes,
+        'is_saved': is_saved,
+        'review_form': ReviewForm(),
+    }
+    
+    return render(request, 'recipes/recipe_detail.html', context)
+
+@login_required
+@require_POST
+def add_review(request, pk):
+    """Add a review to a recipe"""
+    recipe = get_object_or_404(Recipe, pk=pk)
+    
+    # Check if user already reviewed this recipe
+    existing_review = Review.objects.filter(
+        user=request.user, 
+        recipe=recipe
+    ).first()
+    
+    if existing_review:
+        messages.warning(request, 'You have already reviewed this recipe.')
+        return redirect('recipe_detail', pk=pk)
+    
+    form = ReviewForm(request.POST)
+    if form.is_valid():
+        review = form.save(commit=False)
+        review.user = request.user
+        review.recipe = recipe
+        review.save()
+        
+        messages.success(request, 'Your review has been added!')
+    else:
+        messages.error(request, 'Please correct the errors in your review.')
+    
+    return redirect('recipe_detail', pk=pk)
+
+@login_required
+@require_POST
+def save_recipe(request, pk):
+    """Save or unsave a recipe for the user"""
+    recipe = get_object_or_404(Recipe, pk=pk)
+    saved_recipe, created = SavedRecipe.objects.get_or_create(
+        user=request.user,
+        recipe=recipe
+    )
+    
+    if not created:
+        saved_recipe.delete()
+        saved = False
+    else:
+        saved = True
+    
+    return JsonResponse({
+        'saved': saved,
+        'message': 'Recipe saved!' if saved else 'Recipe removed from saved'
+    })

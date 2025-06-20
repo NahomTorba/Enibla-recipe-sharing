@@ -31,6 +31,17 @@ urlpatterns = [
     # URLs for recipes
     path('recipes/create/', views.create_recipe, name='create_recipe'),
     
+    # URLs for deailed recipe view
+    #path('', views.recipe_list, name='recipe_list'),
+    path('recipe/<int:pk>/', views.recipe_detail, name='recipe_detail'),
+    path('recipe/<int:pk>/review/', views.add_review, name='add_review'),
+    path('api/recipes/<int:pk>/save/', views.save_recipe, name='save_recipe'),
+    #path('recipes/tag/<slug:slug>/', views.recipes_by_tag, name='recipes_by_tag'),
+    #path('create/', views.recipe_create, name='recipe_create'),
+    #path('recipe/<int:pk>/edit/', views.recipe_edit, name='recipe_edit'),
+    #path('profile/<str:username>/', views.user_profile, name='user_profile'),
+    
+    
 ]
 
 
