@@ -243,7 +243,7 @@ def create_recipe(request):
             
             recipe.save()
             messages.success(request, 'Recipe shared successfully!')
-            return redirect('recipe_detail', pk=recipe.id)
+            return redirect('recipe_detail', slug=recipe.slug)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -385,53 +385,5 @@ def delete_recipe(request, slug):
         return redirect('index')
     
 
-#viwes for edit recipe
-@login_required
-def edit_recipe(request, recipe_id):
-    """
-    View to edit an existing recipe
-    """
-    recipe = get_object_or_404(Recipe, id=recipe_id, author=request.user)
-    
-    # Get tag choices (same as in create view)
-    tag_choices = [
-        ('breakfast', 'Breakfast'),
-        ('lunch', 'Lunch'),
-        ('dinner', 'Dinner'),
-        ('dessert', 'Dessert'),
-        ('snack', 'Snack'),
-        ('fasting', 'Fasting'),
-    ]
-    
-    if request.method == 'POST':
-        form = RecipeForm(request.POST, request.FILES, instance=recipe)
-        if form.is_valid():
-            updated_recipe = form.save(commit=False)
-            updated_recipe.author = request.user
-            updated_recipe.save()
-            
-            # Handle tags
-            tags = request.POST.getlist('tags')
-            updated_recipe.tags.clear()
-            for tag in tags:
-                updated_recipe.tags.add(tag)
-            
-            messages.success(request, 'Recipe updated successfully!')
-            return redirect('recipe_detail', recipe_id=updated_recipe.id)
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = RecipeForm(instance=recipe)
-    
-    # Get current recipe tags
-    current_tags = list(recipe.tags.values_list('name', flat=True)) if hasattr(recipe, 'tags') else []
-    
-    context = {
-        'form': form,
-        'recipe': recipe,
-        'tag_choices': tag_choices,
-        'current_tags': current_tags,
-        'is_edit': True
-    }
-    return render(request, 'recipes/edit_recipe.html', context)
+# Removed redundant edit_recipe view that used recipe_id parameter
 
