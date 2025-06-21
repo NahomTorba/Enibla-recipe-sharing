@@ -10,7 +10,7 @@
     <!-- Open Graph Meta Tags for Social Sharing -->
     <meta property="og:title" content="{{ recipe.title }}">
     <meta property="og:description" content="{{ recipe.description|truncatewords:30 }}">
-    <meta property="og:image" content="{% if recipe.image %}{{ request.build_absolute_uri:recipe.image.url }}{% endif %}">
+    <meta property="og:image" content="{{ image_url }}">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     <meta property="og:type" content="article">
     
@@ -18,7 +18,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ recipe.title }}">
     <meta name="twitter:description" content="{{ recipe.description|truncatewords:30 }}">
-    <meta name="twitter:image" content="{% if recipe.image %}{{ request.build_absolute_uri:recipe.image.url }}{% endif %}">
+    <meta property="og:image" content="{{ image_url }}">
     
     <link rel="stylesheet" href="{% static 'css/recipe_detail.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -27,15 +27,15 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="{% url 'home' %}" class="nav-brand">
+            <a href="{% url 'index' %}" class="nav-brand">
                 <i class="fas fa-utensils"></i>
                 Enibla Recipes
             </a>
             <div class="nav-menu">
                 <a href="{% url 'recipe_list' %}" class="nav-link">All Recipes</a>
-                <a href="{% url 'recipe_create' %}" class="nav-link">Add Recipe</a>
+                <a href="{% url 'create_recipe' %}" class="nav-link">Add Recipe</a>
                 {% if user.is_authenticated %}
-                    <a href="{% url 'profile' %}" class="nav-link">My Profile</a>
+                    <a href="{% url 'my_profile' %}" class="nav-link">My Profile</a>
                     <a href="{% url 'logout' %}" class="nav-link">Logout</a>
                 {% else %}
                     <a href="{% url 'login' %}" class="nav-link">Login</a>
@@ -47,7 +47,7 @@
     <div class="container">
         <!-- Breadcrumb -->
         <nav class="breadcrumb">
-            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'index' %}">Home</a>
             <span class="breadcrumb-separator">/</span>
             <a href="{% url 'recipe_list' %}">Recipes</a>
             <span class="breadcrumb-separator">/</span>
@@ -90,7 +90,7 @@
         <div class="recipe-meta">
             <div class="meta-item">
                 <i class="fas fa-user"></i>
-                <span>By <a href="{% url 'user_profile' recipe.author.user.username %}">{{ recipe.author.user.get_full_name|default:recipe.author.user.username }}</a></span>
+                <span>By <a href="{% url 'profile_detail' recipe.author.user.username %}">{{ recipe.author.user.get_full_name|default:recipe.author.user.username }}</a></span>
             </div>
             <div class="meta-item">
                 <i class="fas fa-calendar"></i>

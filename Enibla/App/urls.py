@@ -3,6 +3,7 @@ from . import views
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from .views import RecipeListView
 
 
 urlpatterns = [
@@ -30,6 +31,7 @@ urlpatterns = [
 
     # URLs for recipes
     path('recipes/create/', views.create_recipe, name='create_recipe'),
+    path('recipes/', RecipeListView.as_view(), name='recipe_list'),
     
     # URLs for deailed recipe view
     #path('', views.recipe_list, name='recipe_list'),

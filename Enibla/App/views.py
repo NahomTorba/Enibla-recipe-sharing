@@ -254,10 +254,13 @@ def recipe_detail(request, pk):
     """Display detailed view of a single recipe"""
     recipe = get_object_or_404(Recipe, pk=pk)
     
-    # Calculate average rating
+    '''# Calculate average rating
     recipe.average_rating = recipe.reviews.aggregate(
         avg_rating=Avg('rating')
-    )['avg_rating'] or 0
+    )['avg_rating'] or 0'''
+    
+    #image url in the view
+    image_url = request.build_absolute_uri(recipe.image.url) if recipe.image else None
     
     # Get related recipes (same tags or author)
     related_recipes = Recipe.objects.filter(
@@ -277,6 +280,7 @@ def recipe_detail(request, pk):
         'related_recipes': related_recipes,
         'is_saved': is_saved,
         'review_form': ReviewForm(),
+        'image_url': image_url,
     }
     
     return render(request, 'recipes/recipe_detail.html', context)
