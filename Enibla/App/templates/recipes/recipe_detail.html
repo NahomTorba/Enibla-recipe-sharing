@@ -6,217 +6,315 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ recipe.title }} - Enibla Recipe Sharing</title>
     <meta name="description" content="{{ recipe.description|truncatewords:30 }}">
-    
-    <!-- Open Graph Meta Tags for Social Sharing -->
-    <meta property="og:title" content="{{ recipe.title }}">
-    <meta property="og:description" content="{{ recipe.description|truncatewords:30 }}">
-    <meta property="og:image" content="{{ image_url }}">
-    <meta property="og:url" content="{{ request.build_absolute_uri }}">
-    <meta property="og:type" content="article">
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ recipe.title }}">
-    <meta name="twitter:description" content="{{ recipe.description|truncatewords:30 }}">
-    <meta property="og:image" content="{{ image_url }}">
-    
     <link rel="stylesheet" href="{% static 'css/recipe_detail.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="{% url 'index' %}" class="nav-brand">
-                <i class="fas fa-utensils"></i>
-                Enibla Recipes
-            </a>
-            <div class="nav-menu">
-                <a href="{% url 'recipe_list' %}" class="nav-link">All Recipes</a>
-                <a href="{% url 'create_recipe' %}" class="nav-link">Add Recipe</a>
+            <!-- Logo -->
+            <div class="nav-logo">
+                <a href="{% url 'index' %}" class="logo-link">
+                    <i class="fas fa-utensils"></i>
+                    <span>Enibla</span>
+                </a>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="nav-search">
+                <form class="search-form" method="get" action="#">
+                    <div class="search-input-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" name="q" placeholder="Search recipes, ingredients, or cuisines..." class="search-input" value="{{ request.GET.q|default:'' }}">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="nav-links">
+                <a href="{% url 'recipe_list' %}" class="nav-link">
+                    <i class="fas fa-utensils"></i>
+                    <span>Recipes</span>
+                </a>
+                
                 {% if user.is_authenticated %}
-                    <a href="{% url 'my_profile' %}" class="nav-link">My Profile</a>
-                    <a href="{% url 'logout' %}" class="nav-link">Logout</a>
+                    <a href="{% url 'create_recipe' %}" class="nav-link nav-link-primary">
+                        <i class="fas fa-plus"></i>
+                        <span>Share Recipe</span>
+                    </a>
+                    
+                    <!-- Profile Dropdown -->
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <button class="profile-btn" id="profileBtn">
+                            {% if user.userprofile.profile_image %}
+                                <img src="{{ user.userprofile.profile_image.url }}" alt="Profile" class="profile-avatar">
+                            {% else %}
+                                <div class="profile-avatar profile-avatar-placeholder">
+                                    {% if user.first_name %}
+                                        <span class="avatar-initial">{{ user.first_name.0|upper }}</span>
+                                    {% else %}
+                                        <i class="fas fa-user"></i>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <div class="dropdown-header">
+                                <div class="user-info">
+                                    {% if user.userprofile.profile_image %}
+                                        <img src="{{ user.userprofile.profile_image.url }}" alt="Profile" class="user-avatar">
+                                    {% else %}
+                                        <div class="user-avatar user-avatar-placeholder">
+                                            {% if user.first_name %}
+                                                <span class="user-avatar-initial">{{ user.first_name.0|upper }}</span>
+                                            {% else %}
+                                                <i class="fas fa-user"></i>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="user-details">
+                                        <h4>{{ user.get_full_name|default:user.username }}</h4>
+                                        <p>{{ user.email }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <a href="{% url 'my_profile' %}" class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span>My Profile</span>
+                            </a>
+                            
+                            <a href="{% url 'create_recipe' %}" class="dropdown-item">
+                                <i class="fas fa-plus"></i>
+                                <span>Share Recipe</span>
+                            </a>
+                            
+                            <a href="{% url 'edit_profile' %}" class="dropdown-item">
+                                <i class="fas fa-edit"></i>
+                                <span>Edit Profile</span>
+                            </a>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <a href="{% url 'logout' %}" class="dropdown-item dropdown-item-logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Log Out</span>
+                            </a>
+                        </div>
+                    </div>
                 {% else %}
-                    <a href="{% url 'login' %}" class="nav-link">Login</a>
+                    <a href="{% url 'login' %}" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Log In</span>
+                    </a>
+                    <a href="{% url 'signup' %}" class="nav-link nav-link-primary">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Sign Up</span>
+                    </a>
                 {% endif %}
             </div>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
     </nav>
 
     <div class="container">
         <!-- Breadcrumb -->
         <nav class="breadcrumb">
-            <a href="{% url 'index' %}">Home</a>
-            <span class="breadcrumb-separator">/</span>
+            <a href="{% url 'index' %}">
+                <i class="fas fa-home"></i>
+                Home
+            </a>
+            <i class="fas fa-chevron-right"></i>
             <a href="{% url 'recipe_list' %}">Recipes</a>
-            <span class="breadcrumb-separator">/</span>
-            <span class="breadcrumb-current">{{ recipe.title }}</span>
+            <i class="fas fa-chevron-right"></i>
+            <span class="current">{{ recipe.title }}</span>
         </nav>
 
         <!-- Recipe Header -->
         <div class="recipe-header">
             <div class="recipe-title-section">
                 <h1 class="recipe-title">{{ recipe.title }}</h1>
+                
+                <!-- Rating Display -->
+                {% if total_reviews > 0 %}
                 <div class="recipe-rating">
-                    <div class="stars" data-rating="{{ recipe.average_rating|floatformat:1 }}">
+                    <div class="stars">
                         {% for i in "12345" %}
-                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star {% if i|add:0 <= avg_rating %}active{% endif %}"></i>
                         {% endfor %}
                     </div>
-                    <span class="rating-text">({{ recipe.reviews.count }} reviews)</span>
+                    <span class="rating-text">{{ avg_rating|floatformat:1 }} ({{ total_reviews }} review{{ total_reviews|pluralize }})</span>
+                </div>
+                {% endif %}
+                
+                <div class="recipe-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-user"></i>
+                        <span>By <a href="{% url 'profile_detail' recipe.author.user.username %}" class="author-link">{{ recipe.author.user.get_full_name|default:recipe.author.user.username }}</a></span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>{{ recipe.created_at|date:"F d, Y" }}</span>
+                    </div>
+                    {% if recipe.tags %}
+                        <div class="meta-item">
+                            <i class="fas fa-tags"></i>
+                            <div class="recipe-tags">
+                                {% for tag in recipe.get_tag_choices_list %}
+                                    <span class="tag">{{ tag|title }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             
             <div class="recipe-actions">
-                <button class="btn btn-primary" id="shareBtn">
-                    <i class="fas fa-share-alt"></i> Share
-                </button>
-                <button class="btn btn-secondary" id="saveBtn" data-recipe-id="{{ recipe.id }}">
-                    <i class="fas fa-bookmark"></i> Save
-                </button>
-                <button class="btn btn-secondary" onclick="window.print()">
-                    <i class="fas fa-print"></i> Print
-                </button>
+                {% if user.is_authenticated %}
+                    <button class="btn btn-secondary save-btn" id="saveRecipeBtn" data-recipe-id="{{ recipe.id }}">
+                        <i class="fas fa-bookmark"></i>
+                        <span class="save-text">Save Recipe</span>
+                    </button>
+                {% endif %}
                 {% if user.userprofile == recipe.author %}
-                    <a href="{% url 'recipe_edit' recipe.pk %}" class="btn btn-warning">
-                        <i class="fas fa-edit"></i> Edit
+                    <a href="#" class="btn btn-primary">
+                        <i class="fas fa-edit"></i>
+                        Edit Recipe
                     </a>
                 {% endif %}
-            </div>
-        </div>
-
-        <!-- Recipe Meta Info -->
-        <div class="recipe-meta">
-            <div class="meta-item">
-                <i class="fas fa-user"></i>
-                <span>By <a href="{% url 'profile_detail' recipe.author.user.username %}">{{ recipe.author.user.get_full_name|default:recipe.author.user.username }}</a></span>
-            </div>
-            <div class="meta-item">
-                <i class="fas fa-calendar"></i>
-                <span>{{ recipe.created_at|date:"F d, Y" }}</span>
-            </div>
-            <div class="meta-item">
-                <i class="fas fa-clock"></i>
-                <span>Updated {{ recipe.updated_at|date:"M d, Y" }}</span>
             </div>
         </div>
 
         <!-- Recipe Image -->
         {% if recipe.image %}
         <div class="recipe-image-container">
-            <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-image" id="recipeImage">
-            <div class="image-overlay">
-                <button class="btn btn-light" id="fullscreenBtn">
-                    <i class="fas fa-expand"></i>
-                </button>
-            </div>
+            <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-image">
         </div>
         {% endif %}
 
         <!-- Recipe Content -->
         <div class="recipe-content">
-            <!-- Left Sidebar -->
-            <div class="recipe-sidebar">
-                <!-- Tags -->
-                {% if recipe.tags %}
-                <div class="section-card">
-                    <h3 class="section-title">
-                        <i class="fas fa-tags"></i> Categories
-                    </h3>
-                    <div class="tags-container">
-                        {% for tag in recipe.get_tag_choices_list %}
-                        <span class="tag">{{ tag|title }}</span>
-                        {% endfor %}
-                    </div>
+            <!-- Description -->
+            {% if recipe.description %}
+            <div class="section-card">
+                <h2 class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    About This Recipe
+                </h2>
+                <div class="recipe-description">
+                    {{ recipe.description|linebreaks }}
                 </div>
-                {% endif %}
+            </div>
+            {% endif %}
 
-                <!-- Ingredients -->
-                <div class="section-card">
-                    <h3 class="section-title">
-                        <i class="fas fa-list-ul"></i> Ingredients
-                    </h3>
-                    <div class="ingredients-content">
-                        {{ recipe.ingredients|linebreaks }}
-                    </div>
-                    <div class="ingredients-checklist" id="ingredientsList">
-                        <!-- JavaScript will populate this with checkboxes -->
-                    </div>
+            <!-- Ingredients -->
+            <div class="section-card">
+                <h2 class="section-title">
+                    <i class="fas fa-list-ul"></i>
+                    Ingredients
+                </h2>
+                <div class="ingredients-content">
+                    {{ recipe.ingredients|linebreaks }}
                 </div>
             </div>
 
-            <!-- Main Content -->
-            <div class="recipe-main">
-                <!-- Description -->
-                {% if recipe.description %}
-                <div class="section-card">
-                    <h3 class="section-title">
-                        <i class="fas fa-info-circle"></i> About This Recipe
-                    </h3>
-                    <p class="recipe-description">{{ recipe.description|linebreaks }}</p>
+            <!-- Instructions -->
+            <div class="section-card">
+                <h2 class="section-title">
+                    <i class="fas fa-list-ol"></i>
+                    Instructions
+                </h2>
+                <div class="instructions-content">
+                    {{ recipe.instructions|linebreaks }}
+                </div>
+            </div>
+
+            <!-- Reviews Section -->
+            <div class="section-card">
+                <h2 class="section-title">
+                    <i class="fas fa-star"></i>
+                    Reviews ({{ total_reviews }})
+                </h2>
+                
+                <!-- Add/Edit Review Form -->
+                {% if user.is_authenticated and user.userprofile != recipe.author %}
+                <div class="review-form-container">
+                    <h3>{% if user_review %}Update Your Review{% else %}Leave a Review{% endif %}</h3>
+                    <form method="post" action="{% url 'add_review' recipe.id %}" class="review-form">
+                        {% csrf_token %}
+                        
+                        <!-- Star Rating Input -->
+                        <div class="rating-input">
+                            <label>Rating:</label>
+                            <div class="star-rating" id="starRating">
+                                {% for i in "12345" %}
+                                <i class="fas fa-star" data-rating="{{ i }}"></i>
+                                {% endfor %}
+                            </div>
+                            {{ review_form.rating }}
+                        </div>
+                        
+                        <!-- Comment Input -->
+                        <div class="comment-input">
+                            {% if user_review %}
+                                <textarea name="comment" rows="4" placeholder="Share your thoughts about this recipe..." class="form-control" required>{{ user_review.comment }}</textarea>
+                            {% else %}
+                                {{ review_form.comment }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                {% if user_review %}Update Review{% else %}Submit Review{% endif %}
+                            </button>
+                            {% if user_review %}
+                                <a href="{% url 'delete_review' recipe.id user_review.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete your review?')">
+                                    Delete Review
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+                {% elif user.is_authenticated and user.userprofile == recipe.author %}
+                <div class="review-notice">
+                    <p><i class="fas fa-info-circle"></i> You cannot review your own recipe.</p>
+                </div>
+                {% elif not user.is_authenticated %}
+                <div class="review-notice">
+                    <p><i class="fas fa-sign-in-alt"></i> <a href="{% url 'login' %}">Login</a> to leave a review.</p>
                 </div>
                 {% endif %}
 
-                <!-- Instructions -->
-                <div class="section-card">
-                    <h3 class="section-title">
-                        <i class="fas fa-list-ol"></i> Instructions
-                        <button class="btn-small" id="timerBtn">
-                            <i class="fas fa-stopwatch"></i> Timer
-                        </button>
-                    </h3>
-                    <div class="cooking-timer" id="cookingTimer" style="display: none;">
-                        <div class="timer-display">
-                            <span id="timerDisplay">00:00</span>
-                            <div class="timer-controls">
-                                <button class="btn btn-small" id="startTimer">Start</button>
-                                <button class="btn btn-small" id="pauseTimer">Pause</button>
-                                <button class="btn btn-small" id="resetTimer">Reset</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="instructions-content">
-                        {{ recipe.instructions|linebreaks }}
-                    </div>
-                    <div class="instructions-checklist" id="instructionsList">
-                        <!-- JavaScript will populate this with interactive steps -->
-                    </div>
-                </div>
-
-                <!-- Reviews Section -->
-                <div class="section-card">
-                    <h3 class="section-title">
-                        <i class="fas fa-star"></i> Reviews ({{ recipe.reviews.count }})
-                    </h3>
-                    
-                    <!-- Add Review Form -->
-                    {% if user.is_authenticated %}
-                    <div class="add-review">
-                        <h4>Leave a Review</h4>
-                        <form id="reviewForm" method="post" action="{% url 'add_review' recipe.pk %}">
-                            {% csrf_token %}
-                            <div class="rating-input">
-                                <label>Rating:</label>
-                                <div class="star-rating" id="starRating">
-                                    {% for i in "12345" %}
-                                    <i class="fas fa-star" data-rating="{{ i }}"></i>
-                                    {% endfor %}
+                <!-- Reviews List -->
+                <div class="reviews-list">
+                    {% for review in reviews %}
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">
+                                    {% if review.user.userprofile.profile_image %}
+                                        <img src="{{ review.user.userprofile.profile_image.url }}" alt="{{ review.user.username }}">
+                                    {% else %}
+                                        <div class="avatar-placeholder">
+                                            {{ review.user.first_name.0|default:review.user.username.0|upper }}
+                                        </div>
+                                    {% endif %}
                                 </div>
-                                <input type="hidden" name="rating" id="ratingInput" required>
-                            </div>
-                            <textarea name="comment" placeholder="Share your thoughts about this recipe..." rows="4"></textarea>
-                            <button type="submit" class="btn btn-primary">Submit Review</button>
-                        </form>
-                    </div>
-                    {% endif %}
-
-                    <!-- Reviews List -->
-                    <div class="reviews-list">
-                        {% for review in recipe.reviews.all|slice:":5" %}
-                        <div class="review-item">
-                            <div class="review-header">
-                                <div class="reviewer-info">
+                                <div class="reviewer-details">
                                     <strong>{{ review.user.get_full_name|default:review.user.username }}</strong>
                                     <div class="review-rating">
                                         {% for i in "12345" %}
@@ -224,75 +322,45 @@
                                         {% endfor %}
                                     </div>
                                 </div>
-                                <span class="review-date">{{ review.created_at|date:"M d, Y" }}</span>
                             </div>
-                            <p class="review-comment">{{ review.comment }}</p>
+                            <span class="review-date">{{ review.created_at|date:"M d, Y" }}</span>
                         </div>
-                        {% empty %}
-                        <p class="no-reviews">No reviews yet. Be the first to review this recipe!</p>
-                        {% endfor %}
+                        <p class="review-comment">{{ review.comment|linebreaks }}</p>
                     </div>
+                    {% empty %}
+                    <div class="no-reviews">
+                        <i class="fas fa-star-half-alt"></i>
+                        <p>No reviews yet. Be the first to review this recipe!</p>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
 
-        <!-- Related Recipes -->
-        {% if related_recipes %}
-        <div class="section-card">
-            <h3 class="section-title">
-                <i class="fas fa-heart"></i> You Might Also Like
-            </h3>
-            <div class="related-recipes">
-                {% for related in related_recipes %}
-                <div class="recipe-card">
-                    <a href="{% url 'recipe_detail' related.pk %}">
-                        {% if related.image %}
-                        <img src="{{ related.image.url }}" alt="{{ related.title }}" class="recipe-card-image">
-                        {% endif %}
-                        <div class="recipe-card-content">
-                            <h4 class="recipe-card-title">{{ related.title }}</h4>
-                            <div class="recipe-card-meta">
-                                <span><i class="fas fa-user"></i> {{ related.author.user.username }}</span>
-                                <span><i class="fas fa-star"></i> {{ related.average_rating|floatformat:1 }}</span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                {% endfor %}
-            </div>
+        <!-- Back to Recipes -->
+        <div class="navigation-footer">
+            <a href="{% url 'recipe_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Back to All Recipes
+            </a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'create_recipe' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Share Your Recipe
+                </a>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 
-    <!-- Share Modal -->
-    <div class="modal" id="shareModal">
+    <!-- Save Success Modal -->
+    <div class="modal" id="saveModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Share This Recipe</h3>
+                <h3 id="modalTitle">Recipe Saved!</h3>
                 <button class="modal-close" id="closeModal">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="share-options">
-                    <button class="share-btn facebook" data-platform="facebook">
-                        <i class="fab fa-facebook-f"></i> Facebook
-                    </button>
-                    <button class="share-btn twitter" data-platform="twitter">
-                        <i class="fab fa-twitter"></i> Twitter
-                    </button>
-                    <button class="share-btn pinterest" data-platform="pinterest">
-                        <i class="fab fa-pinterest"></i> Pinterest
-                    </button>
-                    <button class="share-btn whatsapp" data-platform="whatsapp">
-                        <i class="fab fa-whatsapp"></i> WhatsApp
-                    </button>
-                </div>
-                <div class="share-link">
-                    <label for="shareUrl">Recipe Link:</label>
-                    <div class="link-container">
-                        <input type="text" id="shareUrl" value="{{ request.build_absolute_uri }}" readonly>
-                        <button class="btn btn-primary" id="copyLink">Copy</button>
-                    </div>
-                </div>
+                <p id="modalMessage">This recipe has been saved to your profile.</p>
             </div>
         </div>
     </div>
@@ -303,5 +371,6 @@
     </button>
 
     <script src="{% static 'js/recipe_detail.js' %}"></script>
+    <script src="{% static 'js/home.js' %}"></script>
 </body>
 </html>
