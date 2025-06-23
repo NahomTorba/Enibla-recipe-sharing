@@ -31,6 +31,13 @@ urlpatterns = [
 
     # URLs for recipes
     path('recipes/create/', views.create_recipe, name='create_recipe'),
+
+    # URLs for recipe editing
+    path('', views.RecipeListView.as_view(), name='recipe_list'),
+    path('recipes/<str:slug>/edit/', views.edit_recipe, name='edit_recipe'),
+    path('recipes/<str:slug>/', views.recipe_detail, name='recipe_detail'),
+    path('recipes/<str:slug>/delete/', views.delete_recipe, name='delete_recipe')
+
     path('recipes/', RecipeListView.as_view(), name='recipe_list'),
     
     # URLs for deailed recipe view
@@ -44,6 +51,7 @@ urlpatterns = [
     #path('profile/<str:username>/', views.user_profile, name='user_profile'),
     
     
+
 ]
 
 

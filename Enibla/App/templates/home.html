@@ -7,6 +7,7 @@
     <title>Enibla - Discover & Share Amazing Recipes</title>
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/recipe_card.css' %}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -280,9 +281,16 @@
                                 <span class="recipe-date">{{ recipe.created_at|timesince }} ago</span>
                             </div>
                             
-                            <a href="{% url 'recipe_detail' recipe.pk %}" class="recipe-link">
-                                View Recipe <i class="fas fa-arrow-right"></i>
-                            </a>
+                            <div class="recipe-actions">
+                                <a href="{% url 'recipe_detail' recipe.slug %}" class="recipe-link">
+                                    View Recipe <i class="fas fa-arrow-right"></i>
+                                </a>
+                                {% if recipe.author.user == request.user %}
+                                    <a href="{% url 'edit_recipe' recipe.slug %}" class="edit-button">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 {% empty %}

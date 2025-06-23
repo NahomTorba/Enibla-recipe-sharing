@@ -10,9 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-from pathlib import Path
 import os
+import sys
 import environ
+from pathlib import Path
+
+# Add project root to Python path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+# Add Enibla package to Python path
+sys.path.append(str(Path(__file__).resolve().parent))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'App.apps.AppConfig'
+    'App.apps.AppConfigClass'
 ]
 
 MIDDLEWARE = [
@@ -57,7 +64,7 @@ ROOT_URLCONF = 'Enibla.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -70,7 +77,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Enibla.wsgi.application'
-
+ASGI_APPLICATION = 'Enibla.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -134,12 +141,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# Email settings using Mailtrap for development values from .env file
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = env('EMAIL_HOST')
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-EMAIL_PORT = env.int('EMAIL_PORT')
-EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS')
+# Email settings for development (prints emails to console)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'eniblarecipies.com'
 PASSWORD_RESET_TIMEOUT = 86400  # 24 hours for password reset link validity

@@ -1,6 +1,7 @@
-from django.shortcuts import render,redirect,get_object_or_404, redirect
+from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
-from .forms import SignUpForm,ReviewForm
+from django.views.decorators.http import require_http_methods, require_POST
+from .forms import SignUpForm, ReviewForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from .email_utils import send_confirmation_email
@@ -11,12 +12,17 @@ from .models import UserProfile, Recipe,Review,SavedRecipe
 from .forms import UserProfileForm, RecipeForm
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
+from django.urls import reverse_lazy
+from django.views.generic import UpdateView, DetailView, ListView
+from django.core.exceptions import PermissionDenied
+from .mixins import AuthorRequiredMixin
+
 from django.http import JsonResponse
 from django.db.models import Avg, Q
-from django.views.decorators.http import require_POST
 
 from django.views.generic import ListView
 from django.core.paginator import Paginator
+
 
 # constants
 CUISINE_CHOICES = [ ('Ethiopian', 'Ethiopian'), ('Eritrea', 'Eritrea'), ('African', 'African'), ('Italian', 'Italian'),('Mexican', 'Mexican'),('Chinese', 'Chinese'),('Japanese', 'Japanese'),('Indian', 'Indian'),('French', 'French'),('American', 'American'),('Korean', 'Korean'),('Spanish', 'Spanish'),('Middle Eastern', 'Middle Eastern'),('Brazilian', 'Brazilian'),('British', 'British')]
@@ -147,14 +153,12 @@ def profile_detail(request, username):
     try:
         user = User.objects.get(username=username)
         profile = UserProfile.objects.get(user=user)
-        recipes = Recipe.objects.filter(author=profile).order_by('-created_at')
     except (User.DoesNotExist, UserProfile.DoesNotExist):
         messages.error(request, 'Profile not found.')
         return redirect('home')
     
     context = {
         'profile': profile,
-        'recipes': recipes,
     }
     return render(request, 'profile/profile_detail.html', context)
 
@@ -219,7 +223,15 @@ def edit_profile(request):
     return render(request, 'profile/edit_profile.html', context)
     
 
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@require_http_methods(["GET", "POST"])
 def create_recipe(request):
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please login to create recipes.')
+        return redirect('login')
+    
     try:
         profile = UserProfile.objects.get(user=request.user)
     except UserProfile.DoesNotExist:
@@ -238,7 +250,7 @@ def create_recipe(request):
             
             recipe.save()
             messages.success(request, 'Recipe shared successfully!')
-            return redirect('profile_detail', username=request.user.username)
+            return redirect('recipe_detail', slug=recipe.slug)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -249,6 +261,138 @@ def create_recipe(request):
         'tag_choices': TAG_CHOICES,
     }
     return render(request, 'create_recipe.html', context)
+class RecipeUpdateView(AuthorRequiredMixin, UpdateView):
+    
+    model = Recipe
+    form_class = RecipeForm
+    template_name = 'recipes/recipe_update.html'
+    context_object_name = 'recipe'
+   
+def update_recipe(request, pk):
+   
+    # Get the recipe object or return 404 if not found
+    recipe = get_object_or_404(Recipe, pk=pk)
+    
+    # Check if the current user is the author of the recipe
+    if recipe.author != request.user:
+        messages.error(request, "You don't have permission to edit this recipe.")
+        return redirect('recipe_detail', pk=recipe.pk)
+    
+    
+    def get_success_url(self):
+        messages.success(self.request, 'Recipe updated successfully!')
+        return self.object.get_absolute_url()
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Your recipe has been updated!')
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        messages.error(self.request, 'Please correct the errors below.')
+        return super().form_invalid(form)
+
+class RecipeDetailView(DetailView):
+    """
+    View for displaying recipe details.
+    """
+    model = Recipe
+    template_name = 'recipes/recipe_detail.html'
+    context_object_name = 'recipe'
+
+class RecipeListView(ListView):
+    """
+    View for listing all recipes.
+    """
+    model = Recipe
+    template_name = 'recipes/recipe_list.html'
+    context_object_name = 'recipes'
+    paginate_by = 10
+    
+    def get_queryset(self):
+        return Recipe.objects.select_related('author').all()
+
+
+@login_required
+def edit_recipe(request, slug):
+    try:
+        recipe = Recipe.objects.get(slug=slug)
+        
+        # Check if user owns the recipe
+        if recipe.author.user != request.user:
+            messages.error(request, "You don't have permission to edit this recipe.")
+            return redirect('recipe_detail', slug=slug)
+
+        if request.method == 'POST':
+            form = RecipeForm(request.POST, request.FILES, instance=recipe)
+            if form.is_valid():
+                recipe = form.save(commit=False)
+                recipe.author = UserProfile.objects.get(user=request.user)
+                
+                # Handle tags
+                selected_tags = request.POST.getlist('tags')
+                recipe.tags = ','.join(selected_tags)
+                
+                recipe.save()
+                messages.success(request, 'Recipe updated successfully!')
+                return redirect('recipe_detail', slug=recipe.slug)
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = RecipeForm(instance=recipe)
+
+        context = {
+            'recipe': recipe,
+            'form': form,
+            'all_tags': TAG_CHOICES
+        }
+        return render(request, 'edit_recipe.html', context)
+
+    except Recipe.DoesNotExist:
+        messages.error(request, 'Recipe not found.')
+        return redirect('index')
+
+
+@login_required
+def recipe_detail(request, slug):
+    try:
+        recipe = Recipe.objects.get(slug=slug)
+        
+        # Get related recipes by searching for recipes that share any of the same tags
+        related_recipes = Recipe.objects.filter(
+            tags__contains=recipe.tags
+        ).exclude(slug=slug)[:3]
+        
+        context = {
+            'recipe': recipe,
+            'related_recipes': related_recipes,
+            'tag_choices': TAG_CHOICES
+        }
+        return render(request, 'recipe_detail.html', context)
+    except Recipe.DoesNotExist:
+        messages.error(request, 'Recipe not found.')
+        return redirect('index')
+
+
+@login_required
+def delete_recipe(request, slug):
+    try:
+        recipe = Recipe.objects.get(slug=slug)
+        if recipe.author.user != request.user:
+            messages.error(request, 'You can only delete your own recipes.')
+            return redirect('recipe_detail', slug=slug)
+        
+        if request.method == 'POST':
+            recipe.delete()
+            messages.success(request, 'Recipe has been deleted successfully.')
+            return redirect('index')
+        
+        return render(request, 'recipe_detail.html', {'recipe': recipe})
+    except Recipe.DoesNotExist:
+        messages.error(request, 'Recipe not found.')
+        return redirect('index')
+    
+
+# Removed redundant edit_recipe view that used recipe_id parameter
 
 def recipe_detail(request, pk):
     """Display detailed view of a single recipe"""
