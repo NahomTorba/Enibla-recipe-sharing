@@ -1,14 +1,14 @@
 from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
-from django.views.decorators.http import require_http_methods
-from .forms import SignUpForm
+from django.views.decorators.http import require_http_methods, require_POST
+from .forms import SignUpForm, ReviewForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from .email_utils import send_confirmation_email
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import UserProfile, Recipe
+from .models import UserProfile, Recipe,Review,SavedRecipe
 from .forms import UserProfileForm, RecipeForm
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
@@ -16,7 +16,14 @@ from django.urls import reverse_lazy
 from django.views.generic import UpdateView, DetailView, ListView
 from django.core.exceptions import PermissionDenied
 from .mixins import AuthorRequiredMixin
-from django.shortcuts import get_object_or_404
+
+from django.http import JsonResponse
+from django.db.models import Avg, Q
+
+from django.views.generic import ListView
+from django.core.paginator import Paginator
+
+
 # constants
 CUISINE_CHOICES = [ ('Ethiopian', 'Ethiopian'), ('Eritrea', 'Eritrea'), ('African', 'African'), ('Italian', 'Italian'),('Mexican', 'Mexican'),('Chinese', 'Chinese'),('Japanese', 'Japanese'),('Indian', 'Indian'),('French', 'French'),('American', 'American'),('Korean', 'Korean'),('Spanish', 'Spanish'),('Middle Eastern', 'Middle Eastern'),('Brazilian', 'Brazilian'),('British', 'British')]
 TAG_CHOICES = (('breakfast', 'Breakfast'),('lunch', 'Lunch'),('dinner', 'Dinner'),('dessert', 'Dessert'),('snack', 'Snack'),('fasting', 'Fasting'),)
@@ -387,3 +394,125 @@ def delete_recipe(request, slug):
 
 # Removed redundant edit_recipe view that used recipe_id parameter
 
+def recipe_detail(request, pk):
+    """Display detailed view of a single recipe"""
+    recipe = get_object_or_404(Recipe, pk=pk)
+    
+    '''# Calculate average rating
+    recipe.average_rating = recipe.reviews.aggregate(
+        avg_rating=Avg('rating')
+    )['avg_rating'] or 0'''
+    
+    #image url in the view
+    image_url = request.build_absolute_uri(recipe.image.url) if recipe.image else None
+    
+    # Get related recipes (same tags or author)
+    related_recipes = Recipe.objects.filter(
+        Q(tags__icontains=recipe.tags) | Q(author=recipe.author)
+    ).exclude(pk=recipe.pk).distinct()[:4]
+    
+    # Check if user has saved this recipe
+    is_saved = False
+    if request.user.is_authenticated:
+        is_saved = SavedRecipe.objects.filter(
+            user=request.user, 
+            recipe=recipe
+        ).exists()
+    
+    context = {
+        'recipe': recipe,
+        'related_recipes': related_recipes,
+        'is_saved': is_saved,
+        'review_form': ReviewForm(),
+        'image_url': image_url,
+    }
+    
+    return render(request, 'recipes/recipe_detail.html', context)
+
+@login_required
+@require_POST
+def add_review(request, pk):
+    """Add a review to a recipe"""
+    recipe = get_object_or_404(Recipe, pk=pk)
+    
+    # Check if user already reviewed this recipe
+    existing_review = Review.objects.filter(
+        user=request.user, 
+        recipe=recipe
+    ).first()
+    
+    if existing_review:
+        messages.warning(request, 'You have already reviewed this recipe.')
+        return redirect('recipe_detail', pk=pk)
+    
+    form = ReviewForm(request.POST)
+    if form.is_valid():
+        review = form.save(commit=False)
+        review.user = request.user
+        review.recipe = recipe
+        review.save()
+        
+        messages.success(request, 'Your review has been added!')
+    else:
+        messages.error(request, 'Please correct the errors in your review.')
+    
+    return redirect('recipe_detail', pk=pk)
+
+@login_required
+@require_POST
+def save_recipe(request, pk):
+    """Save or unsave a recipe for the user"""
+    recipe = get_object_or_404(Recipe, pk=pk)
+    saved_recipe, created = SavedRecipe.objects.get_or_create(
+        user=request.user,
+        recipe=recipe
+    )
+    
+    if not created:
+        saved_recipe.delete()
+        saved = False
+    else:
+        saved = True
+    
+    return JsonResponse({
+        'saved': saved,
+        'message': 'Recipe saved!' if saved else 'Recipe removed from saved'
+    })
+
+class RecipeListView(ListView):
+    model = Recipe
+    template_name = 'recipes/recipe_list.html'
+    context_object_name = 'recipes'
+    paginate_by = 12  # Show 12 recipes per page
+    
+    def get_queryset(self):
+        """
+        Return all active recipes ordered by creation date (most recent first)
+        """
+        return Recipe.objects.all().order_by('-created_at')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_recipes'] = self.get_queryset().count()
+        return context
+
+# Alternative function-based view (if you prefer)
+def recipe_list_view(request):
+    """
+    Function-based view alternative for recipe list
+    """
+    recipes = Recipe.objects.all().order_by('-created_at')
+    
+    # Pagination
+    paginator = Paginator(recipes, 12)  # Show 12 recipes per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'recipes': page_obj,
+        'total_recipes': recipes.count(),
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
+    }
+    
+    return render(request, 'recipes/recipe_list.html', context)
