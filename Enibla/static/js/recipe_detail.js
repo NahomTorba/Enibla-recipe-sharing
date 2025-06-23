@@ -15,6 +15,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize star rating
   initializeStarRating()
+
+  // Initialize ingredients checklist
+  initializeIngredientsChecklist()
+
+  // Initialize numbered directions
+  initializeNumberedDirections()
 })
 
 function initializeSaveRecipe() {
@@ -261,4 +267,116 @@ function updateStarDisplay(stars, rating) {
       star.classList.remove("active")
     }
   })
+}
+
+// Initialize ingredients checklist
+function initializeIngredientsChecklist() {
+  const ingredientsContent = document.querySelector(".ingredients-content")
+  const checklistContainer = document.getElementById("ingredientsChecklist")
+
+  if (ingredientsContent && checklistContainer) {
+    const text = ingredientsContent.textContent || ingredientsContent.innerText
+    const lines = text.split("\n").filter((line) => line.trim() !== "")
+
+    checklistContainer.innerHTML = ""
+
+    lines.forEach((line, index) => {
+      if (line.trim()) {
+        const checklistItem = document.createElement("div")
+        checklistItem.className = "checklist-item"
+        checklistItem.dataset.index = index
+
+        const checkbox = document.createElement("div")
+        checkbox.className = "checklist-checkbox"
+        checkbox.innerHTML = '<i class="fas fa-check" style="display: none;"></i>'
+
+        const textSpan = document.createElement("span")
+        textSpan.className = "checklist-text"
+        textSpan.textContent = line.trim()
+
+        checklistItem.appendChild(checkbox)
+        checklistItem.appendChild(textSpan)
+
+        // Add click event
+        checklistItem.addEventListener("click", () => {
+          toggleChecklistItem(checklistItem, checkbox)
+        })
+
+        checklistContainer.appendChild(checklistItem)
+      }
+    })
+
+    // Load saved state
+    loadChecklistState()
+  }
+}
+
+function toggleChecklistItem(item, checkbox) {
+  const isCompleted = item.classList.contains("completed")
+  const checkIcon = checkbox.querySelector("i")
+
+  if (isCompleted) {
+    // Uncheck
+    item.classList.remove("completed")
+    checkbox.classList.remove("checked")
+    checkIcon.style.display = "none"
+  } else {
+    // Check
+    item.classList.add("completed")
+    checkbox.classList.add("checked")
+    checkIcon.style.display = "block"
+
+    // Add completion animation
+    item.style.transform = "scale(0.98)"
+    setTimeout(() => {
+      item.style.transform = "scale(1)"
+    }, 150)
+  }
+
+  // Save state to localStorage
+  saveChecklistState()
+}
+
+function saveChecklistState() {
+  const recipeId = window.location.pathname.split("/").pop()
+  const state = []
+
+  const checklistItems = document.querySelectorAll("#ingredientsChecklist .checklist-item")
+  checklistItems.forEach((item, index) => {
+    state[index] = item.classList.contains("completed")
+  })
+
+  localStorage.setItem(`recipe_${recipeId}_checklist`, JSON.stringify(state))
+}
+
+function loadChecklistState() {
+  const recipeId = window.location.pathname.split("/").pop()
+  const savedState = localStorage.getItem(`recipe_${recipeId}_checklist`)
+
+  if (savedState) {
+    const state = JSON.parse(savedState)
+    const checklistItems = document.querySelectorAll("#ingredientsChecklist .checklist-item")
+
+    checklistItems.forEach((item, index) => {
+      if (state[index]) {
+        const checkbox = item.querySelector(".checklist-checkbox")
+        const checkIcon = checkbox.querySelector("i")
+
+        item.classList.add("completed")
+        checkbox.classList.add("checked")
+        checkIcon.style.display = "block"
+      }
+    })
+  }
+}
+
+// Initialize numbered directions
+function initializeNumberedDirections() {
+  const directionsContent = document.getElementById("directionsContent")
+
+  if (directionsContent) {
+    // The CSS handles the numbering automatically with counter-reset and counter-increment
+    // This function can be used for additional direction-related functionality if needed
+    console.log("Numbered directions initialized")
+  }
 }

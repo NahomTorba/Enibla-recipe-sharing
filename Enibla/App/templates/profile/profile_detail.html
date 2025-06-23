@@ -145,7 +145,7 @@
                     <div class="recipe-card">
                         <h4>{{ recipe.title }}</h4>
                         <p>{{ recipe.description|truncatechars:100 }}</p>
-                        <a href="#" class="btn btn-sm">View Recipe</a>
+                        <a href="{% url 'recipe_detail' recipe.id %}" class="btn btn-sm">View Recipe</a>
                     </div>
                 {% endfor %}
             </div>
