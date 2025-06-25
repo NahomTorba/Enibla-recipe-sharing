@@ -235,7 +235,7 @@
                         {% if user.is_authenticated and user.userprofile != recipe.author %}
                         <div class="review-form-container">
                             <h3>{% if user_review %}Update Your Review{% else %}Leave a Review{% endif %}</h3>
-                            <form method="post" action="{% url 'add_review' recipe.id %}" class="review-form">
+                            <form method="post" action="{% url 'add_review' slug=recipe.slug %}" class="review-form">
                                 {% csrf_token %}
                                 
                                 <!-- Star Rating Input -->

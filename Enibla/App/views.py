@@ -260,7 +260,7 @@ def create_recipe(request):
         'form': form,
         'tag_choices': TAG_CHOICES,
     }
-    return render(request, 'create_recipe.html', context)
+    return render(request, 'recipes/create_recipe.html', context)
 class RecipeUpdateView(AuthorRequiredMixin, UpdateView):
     
     model = Recipe
@@ -394,10 +394,10 @@ def delete_recipe(request, slug):
 
 # Removed redundant edit_recipe view that used recipe_id parameter
 
-def recipe_detail(request, pk):
+def recipe_detail(request, slug):
     """Display detailed view of a single recipe"""
-    recipe = get_object_or_404(Recipe, pk=pk)
-    
+    recipe = get_object_or_404(Recipe, slug=slug)
+
     '''# Calculate average rating
     recipe.average_rating = recipe.reviews.aggregate(
         avg_rating=Avg('rating')
@@ -431,10 +431,10 @@ def recipe_detail(request, pk):
 
 @login_required
 @require_POST
-def add_review(request, pk):
+def add_review(request, slug):
     """Add a review to a recipe"""
-    recipe = get_object_or_404(Recipe, pk=pk)
-    
+    recipe = get_object_or_404(Recipe, slug=slug)
+
     # Check if user already reviewed this recipe
     existing_review = Review.objects.filter(
         user=request.user, 
@@ -443,8 +443,8 @@ def add_review(request, pk):
     
     if existing_review:
         messages.warning(request, 'You have already reviewed this recipe.')
-        return redirect('recipe_detail', pk=pk)
-    
+        return redirect('recipe_detail', slug=slug)
+
     form = ReviewForm(request.POST)
     if form.is_valid():
         review = form.save(commit=False)
@@ -455,14 +455,14 @@ def add_review(request, pk):
         messages.success(request, 'Your review has been added!')
     else:
         messages.error(request, 'Please correct the errors in your review.')
-    
-    return redirect('recipe_detail', pk=pk)
+
+    return redirect('recipe_detail', slug=slug)
 
 @login_required
 @require_POST
-def save_recipe(request, pk):
+def save_recipe(request, slug):
     """Save or unsave a recipe for the user"""
-    recipe = get_object_or_404(Recipe, pk=pk)
+    recipe = get_object_or_404(Recipe, slug=slug)
     saved_recipe, created = SavedRecipe.objects.get_or_create(
         user=request.user,
         recipe=recipe

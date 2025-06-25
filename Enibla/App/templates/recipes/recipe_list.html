@@ -226,8 +226,8 @@
                                 </div>
                                 <span class="recipe-date">{{ recipe.created_at|timesince }} ago</span>
                             </div>
-                            
-                            <a href="{% url 'recipe_detail' recipe.pk %}" class="recipe-link">
+
+                            <a href="{% url 'recipe_detail' recipe.slug %}" class="recipe-link">
                                 View Recipe <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>

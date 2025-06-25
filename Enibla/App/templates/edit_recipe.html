@@ -151,7 +151,7 @@
 
             <!-- Navigation -->
             <div class="navigation-section">
-                <a href="{% url 'profile_detail' username=request.user.username %}" class="btn btn-secondary" onclick="window.location.href='{% url 'profile_detail' username=request.user.username %}'">
+                <a href="{% url 'profile_detail' username=request.user.username %}" class="btn btn-secondary">
                     <i class="fas fa-user"></i> Go Back to Profile
                 </a>
                 <a href="{% url 'recipe_detail' recipe.slug %}" class="btn btn-outline">

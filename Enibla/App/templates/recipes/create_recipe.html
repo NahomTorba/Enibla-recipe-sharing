@@ -146,7 +146,7 @@
 
         <!-- Navigation -->
         <div class="navigation-section">
-            <a href="#" class="btn btn-outline">
+            <a href="{% url 'profile_detail' username=request.user.username %}" class="btn btn-outline">
                 <i class="fas fa-arrow-left"></i>
                 Back to Profile
             </a>

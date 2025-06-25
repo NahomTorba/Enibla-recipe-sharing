@@ -32,19 +32,16 @@ urlpatterns = [
     # URLs for recipes
     path('recipes/create/', views.create_recipe, name='create_recipe'),
 
-    # URLs for recipe editing
-    path('', views.RecipeListView.as_view(), name='recipe_list'),
-    path('recipes/<str:slug>/edit/', views.edit_recipe, name='edit_recipe'),
-    path('recipes/<str:slug>/', views.recipe_detail, name='recipe_detail'),
-    path('recipes/<str:slug>/delete/', views.delete_recipe, name='delete_recipe')
+    # URLs for recipe editing and deletion
+    path('recipes/<slug:slug>/edit/', views.edit_recipe, name='edit_recipe'),
+    path('recipes/<slug:slug>/delete/', views.delete_recipe, name='delete_recipe'),
 
     path('recipes/', RecipeListView.as_view(), name='recipe_list'),
-    
-    # URLs for deailed recipe view
-    #path('', views.recipe_list, name='recipe_list'),
-    path('recipe/<int:pk>/', views.recipe_detail, name='recipe_detail'),
-    path('recipe/<int:pk>/review/', views.add_review, name='add_review'),
-    path('api/recipes/<int:pk>/save/', views.save_recipe, name='save_recipe'),
+
+    # URLs for detailed recipe view
+    path('recipe/<slug:slug>/', views.recipe_detail, name='recipe_detail'),
+    path('recipe/<slug:slug>/review/', views.add_review, name='add_review'),
+    path('api/recipes/<slug:slug>/save/', views.save_recipe, name='save_recipe'),
     #path('recipes/tag/<slug:slug>/', views.recipes_by_tag, name='recipes_by_tag'),
     #path('create/', views.recipe_create, name='recipe_create'),
     #path('recipe/<int:pk>/edit/', views.recipe_edit, name='recipe_edit'),
