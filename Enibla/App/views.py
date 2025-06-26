@@ -398,10 +398,8 @@ def recipe_detail(request, slug):
     """Display detailed view of a single recipe"""
     recipe = get_object_or_404(Recipe, slug=slug)
 
-    '''# Calculate average rating
-    recipe.average_rating = recipe.reviews.aggregate(
-        avg_rating=Avg('rating')
-    )['avg_rating'] or 0'''
+    # Fetch all reviews for this recipe
+    reviews = recipe.reviews.select_related('user__userprofile').all()
     
     #image url in the view
     image_url = request.build_absolute_uri(recipe.image.url) if recipe.image else None
@@ -418,12 +416,29 @@ def recipe_detail(request, slug):
             user=request.user, 
             recipe=recipe
         ).exists()
-    
+
+    #check is the user has added a review
+    if request.user.is_authenticated:
+        has_reviewed = Review.objects.filter(user=request.user, recipe=recipe).exists()
+
+    #user review
+    user_review = None
+    if request.user.is_authenticated:
+        user_review = Review.objects.filter(user=request.user, recipe=recipe).first()
+
+    # Prepare context for rendering the template
     context = {
         'recipe': recipe,
         'related_recipes': related_recipes,
         'is_saved': is_saved,
         'review_form': ReviewForm(),
+        'reviews': reviews,
+        'has_reviewed': has_reviewed,
+        'user_review': user_review,
+        'total_reviews': reviews.count(),
+        'tag_choices': TAG_CHOICES,
+        'cuisine_choices': CUISINE_CHOICES,
+        'average_rating': recipe.average_rating,
         'image_url': image_url,
     }
     
@@ -457,6 +472,23 @@ def add_review(request, slug):
         messages.error(request, 'Please correct the errors in your review.')
 
     return redirect('recipe_detail', slug=slug)
+
+# delete review function
+@login_required
+def delete_review(request, review_id):
+    """Delete a review from a recipe using review_id"""
+    review = get_object_or_404(Review, id=review_id, user=request.user)
+    recipe = review.recipe
+
+    if request.method == 'POST':
+        review.delete()
+        messages.success(request, 'Your review has been deleted!')
+        return redirect('recipe_detail', slug=recipe.slug)
+    
+    messages.error(request, 'You can only delete your own reviews.')
+    return redirect('recipe_detail', slug=recipe.slug)
+
+# edit review function below
 
 @login_required
 @require_POST

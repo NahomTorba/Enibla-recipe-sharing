@@ -263,7 +263,7 @@
                                         {% if user_review %}Update Review{% else %}Submit Review{% endif %}
                                     </button>
                                     {% if user_review %}
-                                        <a href="{% url 'delete_review' recipe.id user_review.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete your review?')">
+                                        <a href="#" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete your review?')">
                                             Delete Review
                                         </a>
                                     {% endif %}
