@@ -40,11 +40,11 @@ urlpatterns = [
 
     # URLs for detailed recipe view
     path('recipe/<slug:slug>/', views.recipe_detail, name='recipe_detail'),
-    path('recipe/<slug:slug>/review/', views.add_review, name='add_review'),
+    path('recipe/<slug:slug>/review/add', views.add_review, name='add_review'),
+    path('review/<int:review_id>/edit/', views.edit_review, name='edit_review'),
+    path('review/<int:review_id>/delete/', views.delete_review, name='delete_review'),
     path('api/recipes/<slug:slug>/save/', views.save_recipe, name='save_recipe'),
     #path('recipes/tag/<slug:slug>/', views.recipes_by_tag, name='recipes_by_tag'),
-    #path('create/', views.recipe_create, name='recipe_create'),
-    #path('recipe/<int:pk>/edit/', views.recipe_edit, name='recipe_edit'),
     #path('profile/<str:username>/', views.user_profile, name='user_profile'),
     
     

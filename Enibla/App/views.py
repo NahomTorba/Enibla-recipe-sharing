@@ -401,7 +401,7 @@ def recipe_detail(request, slug):
     # Fetch all reviews for this recipe
     reviews = recipe.reviews.select_related('user__userprofile').all()
     
-    #image url in the view
+    # Image url in the view
     image_url = request.build_absolute_uri(recipe.image.url) if recipe.image else None
     
     # Get related recipes (same tags or author)
@@ -417,25 +417,43 @@ def recipe_detail(request, slug):
             recipe=recipe
         ).exists()
 
-    #check is the user has added a review
-    if request.user.is_authenticated:
-        has_reviewed = Review.objects.filter(user=request.user, recipe=recipe).exists()
-
-    #user review
+    # User review and editing state
     user_review = None
+    has_reviewed = False
+    is_editing = False
+    
     if request.user.is_authenticated:
         user_review = Review.objects.filter(user=request.user, recipe=recipe).first()
+        has_reviewed = user_review is not None
+        
+        # Check if user is in edit mode
+        editing_review_id = request.session.get('editing_review_id')
+        is_editing = editing_review_id is not None and user_review and str(user_review.id) == str(editing_review_id)
+        
+        # If we just finished editing, clear the session
+        if not is_editing and editing_review_id:
+            del request.session['editing_review_id']
+
+    # Initialize review form with proper data if editing
+    initial_data = {}
+    if user_review and is_editing:
+        initial_data = {
+            'rating': user_review.rating,
+            'comment': user_review.comment
+        }
+    review_form = ReviewForm(initial=initial_data)
 
     # Prepare context for rendering the template
     context = {
         'recipe': recipe,
         'related_recipes': related_recipes,
         'is_saved': is_saved,
-        'review_form': ReviewForm(),
         'reviews': reviews,
         'has_reviewed': has_reviewed,
         'user_review': user_review,
         'total_reviews': reviews.count(),
+        'is_editing': is_editing,
+        'review_form': review_form,
         'tag_choices': TAG_CHOICES,
         'cuisine_choices': CUISINE_CHOICES,
         'average_rating': recipe.average_rating,
@@ -447,7 +465,7 @@ def recipe_detail(request, slug):
 @login_required
 @require_POST
 def add_review(request, slug):
-    """Add a review to a recipe"""
+    """Add or update a review for a recipe"""
     recipe = get_object_or_404(Recipe, slug=slug)
 
     # Check if user already reviewed this recipe
@@ -456,24 +474,62 @@ def add_review(request, slug):
         recipe=recipe
     ).first()
     
-    if existing_review:
-        messages.warning(request, 'You have already reviewed this recipe.')
-        return redirect('recipe_detail', slug=slug)
-
     form = ReviewForm(request.POST)
     if form.is_valid():
-        review = form.save(commit=False)
-        review.user = request.user
-        review.recipe = recipe
-        review.save()
-        
-        messages.success(request, 'Your review has been added!')
+        if existing_review:
+            # Update existing review with form data
+            existing_review.rating = form.cleaned_data['rating']
+            existing_review.comment = form.cleaned_data['comment']
+            existing_review.save()
+            messages.success(request, 'Your review has been updated!')
+        else:
+            # Create new review
+            review = form.save(commit=False)
+            review.user = request.user
+            review.recipe = recipe
+            review.save()
+            messages.success(request, 'Your review has been added!')
     else:
-        messages.error(request, 'Please correct the errors in your review.')
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(request, f"{field}: {error}")
 
+    # Clear the editing session variable if it exists
+    if 'editing_review_id' in request.session:
+        del request.session['editing_review_id']
+        
     return redirect('recipe_detail', slug=slug)
 
+# edit review function
+@login_required
+def edit_review(request, review_id):
+    """Prepare to edit a review"""
+    review = get_object_or_404(Review, id=review_id, user=request.user)
+    recipe = review.recipe
+    
+    # We'll set a session variable to indicate edit mode
+    request.session['editing_review_id'] = review_id
+    
+    messages.info(request, 'You can now update your review below.')
+    return redirect('recipe_detail', slug=recipe.slug)
+
 # delete review function
+@login_required
+def delete_review(request, review_id):
+    """Delete a review from a recipe using review_id"""
+    review = get_object_or_404(Review, id=review_id, user=request.user)
+    recipe = review.recipe
+
+    if request.method == 'POST':
+        review.delete()
+        messages.success(request, 'Your review has been deleted!')
+    else:
+        messages.error(request, 'Invalid request method for deletion.')
+    
+    return redirect('recipe_detail', slug=recipe.slug)
+
+
+
 @login_required
 def delete_review(request, review_id):
     """Delete a review from a recipe using review_id"""
