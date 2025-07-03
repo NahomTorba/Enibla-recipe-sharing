@@ -184,8 +184,8 @@
                                     <span class="save-text">Save Recipe</span>
                                 </button>
                             {% endif %}
-                            {% if user.userprofile == recipe.author %}
-                                <a href="{% url 'edit_recipe' recipe.id %}" class="btn btn-primary">
+                            {% if user.is_authenticated and user.userprofile and user.userprofile == recipe.author %}
+                                <a href="{% url 'edit_recipe' slug=recipe.slug %}" class="btn btn-primary">
                                     <i class="fas fa-edit"></i>
                                     Edit Recipe
                                 </a>
