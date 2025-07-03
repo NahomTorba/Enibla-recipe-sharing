@@ -1,0 +1,7 @@
+{% for recipe in recipes %}
+    <div>
+        <h2>{{ recipe.title }}</h2>
+        <a href="{% url 'recipe_edit' recipe.pk %}">Edit</a>
+        <a href="{% url 'recipe_delete' recipe.pk %}">Delete</a>
+    </div>
+{% endfor %} 
