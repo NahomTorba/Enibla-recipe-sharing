@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share a Recipe - Enibla</title>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/recipe_form.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                <h1>Enibla</h1>
+            </div>
+            <h2>Share Your Recipe</h2>
+            <p>Share your culinary creation with the Enibla community</p>
+        </div>
+
+        <form id="recipeForm" method="post" enctype="multipart/form-data" action="{% url 'create_recipe' %}">
+            {% csrf_token %}
+            
+            <!-- Recipe Image Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-camera"></i> Recipe Photo</h3>
+                    <p>Upload a mouth-watering photo of your dish</p>
+                </div>
+                <div class="card-content recipe-image-section">
+                    <div class="recipe-image-upload">
+                        <div class="image-preview-container">
+                            <div class="image-preview" id="imagePreview">
+                                <i class="fas fa-image preview-icon"></i>
+                                <p class="preview-text">Click to upload recipe photo</p>
+                                <img id="recipeImagePreview" style="display: none;" alt="Recipe preview">
+                            </div>
+                            <button type="button" class="upload-overlay-btn" id="uploadOverlayBtn">
+                                <i class="fas fa-upload"></i>
+                            </button>
+                        </div>
+                        <input type="file" id="recipeImage" name="image" accept="image/*" style="display: none;">
+                        <div class="upload-actions">
+                            <button type="button" class="btn btn-outline" id="changeImageBtn">Upload Photo</button>
+                            <button type="button" class="btn btn-outline" id="removeImageBtn" style="display: none;">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Recipe Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-info-circle"></i> Recipe Details</h3>
+                    <p>Tell us about your delicious creation</p>
+                </div>
+                <div class="card-content">
+                    <div class="form-group">
+                        <label for="title">Recipe Title *</label>
+                        <input type="text" id="title" name="title" required placeholder="Give your recipe a catchy name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description *</label>
+                        <textarea id="description" name="description" required placeholder="Describe your recipe, what makes it special, or share the story behind it..." maxlength="500"></textarea>
+                        <div class="char-counter">
+                            <span id="descCharCount">0</span>/500 characters
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ingredients Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-list"></i> Ingredients</h3>
+                    <p>List all the ingredients needed for your recipe</p>
+                </div>
+                <div class="card-content">
+                    <div class="form-group">
+                        <label for="ingredients">Ingredients *</label>
+                        <textarea id="ingredients" name="ingredients" required placeholder="List each ingredient on a new line:&#10;• 2 cups all-purpose flour&#10;• 1 tsp baking powder&#10;• 1/2 cup sugar&#10;• 2 large eggs" rows="8"></textarea>
+                        <div class="ingredient-helper">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Tip: Use bullet points or numbers to make your ingredients easy to read</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-clipboard-list"></i> Cooking Instructions</h3>
+                    <p>Step-by-step instructions to recreate your recipe</p>
+                </div>
+                <div class="card-content">
+                    <div class="form-group">
+                        <label for="instructions">Instructions *</label>
+                        <textarea id="instructions" name="instructions" required placeholder="Write clear, step-by-step instructions:&#10;1. Preheat oven to 350°F (175°C)&#10;2. In a large bowl, mix flour and baking powder&#10;3. In another bowl, cream butter and sugar..." rows="10"></textarea>
+                        <div class="instruction-helper">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Tip: Number your steps and include cooking times and temperatures</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tags Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-tags"></i> Recipe Tags</h3>
+                    <p>Help others find your recipe by selecting relevant tags</p>
+                </div>
+                <div class="card-content">
+                    <div class="tags-grid">
+                        {% for tag_value, tag_label in tag_choices %}
+                        <div class="tag-item">
+                            <input type="checkbox" id="tag_{{ tag_value }}" name="tags" value="{{ tag_value }}">
+                            <label for="tag_{{ tag_value }}" class="tag-label">
+                                <i class="fas fa-{% if tag_value == 'breakfast' %}coffee{% elif tag_value == 'lunch' %}hamburger{% elif tag_value == 'dinner' %}utensils{% elif tag_value == 'dessert' %}ice-cream{% elif tag_value == 'snack' %}cookie-bite{% elif tag_value == 'fasting' %}moon{% endif %}"></i>
+                                {{ tag_label }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div id="selectedTags" class="selected-tags" style="display: none;">
+                        <p><strong>Selected tags:</strong></p>
+                        <div id="tagsList" class="tags-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="submit-section">
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-share"></i>
+                    Share Recipe
+                </button>
+            </div>
+        </form>
+
+        <!-- Navigation -->
+        <div class="navigation-section">
+            <a href="{% url 'profile_detail' username=request.user.username %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i>
+                Back to Profile
+            </a>
+        </div>
+    </div>
+
+    <script src="{% static 'js/recipe_form.js' %}"></script>
+</body>
+</html>

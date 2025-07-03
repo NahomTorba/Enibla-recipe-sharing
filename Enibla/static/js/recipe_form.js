@@ -18,9 +18,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const selectedTagsDiv = document.getElementById("selectedTags")
   const tagsList = document.getElementById("tagsList")
 
-  // Form submission
+// Form submission
   const recipeForm = document.getElementById("recipeForm")
   const submitBtn = document.getElementById("submitBtn")
+
+  // Remove custom form submission handlers
+  // Form will submit normally through Django's form handling
+  submitBtn.addEventListener('click', function() {
+    // Submit the form directly
+    recipeForm.submit();
+  })
 
   // Recipe image upload handlers
   function handleImageUpload() {
@@ -117,25 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return true
   }
 
-  // Form submission handler
-  function handleFormSubmit(event) {
-    event.preventDefault()
-
-    if (!validateForm()) {
-      return
-    }
-
-    // Show loading state
-    submitBtn.disabled = true
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sharing Recipe...'
-    submitBtn.classList.add("loading")
-
-    // Simulate form submission delay
-    setTimeout(() => {
-      // Actually submit the form
-      recipeForm.submit()
-    }, 1000)
-  }
+// Remove custom form submission handler since we're using Django's form handling
+  // Form will submit normally through Django's form handling
 
   // Auto-resize textareas
   function autoResizeTextarea(textarea) {

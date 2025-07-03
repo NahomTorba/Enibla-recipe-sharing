@@ -5,11 +5,10 @@ import sys
 import pathlib
 
 # Add project directory to Python path
-project_path = str(pathlib.Path(__file__).parent)
-sys.path.append(project_path)
+sys.path.append(str(pathlib.Path(__file__).parent))
 
 # Add Enibla package to Python path
-sys.path.append(os.path.join(project_path, 'Enibla'))
+sys.path.append(str(pathlib.Path(__file__).parent / 'Enibla'))
 
 
 def main():

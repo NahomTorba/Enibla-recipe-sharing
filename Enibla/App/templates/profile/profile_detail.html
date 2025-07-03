@@ -132,25 +132,85 @@
         </div>
 
         <!-- Recent Recipes Section (Placeholder for future features) -->
-        <div class="card">
-            <div class="card-header">
-                <h3><i class="fas fa-utensils"></i> Recent Recipes</h3>
-                <p>Latest recipes shared by {{ profile.user.first_name|default:profile.user.username }}</p>
-            </div>
-            <div class="card-content">
-                <div class="empty-state">
-                    <i class="fas fa-utensils empty-icon"></i>
-                    <h4>No recipes yet</h4>
-                    <p>{{ profile.user.first_name|default:profile.user.username }} hasn't shared any recipes yet.</p>
-                    {% if request.user == profile.user %}
-                        <a href="#" class="btn btn-outline">
-                            <i class="fas fa-plus"></i>
-                            Share Your First Recipe
-                        </a>
-                    {% endif %}
+        <!-- Recent Recipes Section -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-utensils"></i> Recent Recipes</h3>
+        <p>Latest recipes shared by {{ profile.user.first_name|default:profile.user.username }}</p>
+    </div>
+    <div class="card-content">
+    {% if recipes %}
+        <div class="recipes-list">
+            {% for recipe in recipes %}
+                <div class="recipe-card">
+                    <h4>{{ recipe.title }}</h4>
+                    <p>{{ recipe.description|truncatechars:100 }}</p>
+                    <a href="{% url 'recipe_detail' recipe.slug %}" class="btn btn-sm">View Recipe</a>
                 </div>
-            </div>
+            {% endfor %}
         </div>
+    {% endif %} 
+
+    <div class="profile-recipes">
+        {% if profile.user.recipe_set.all %}
+            <div class="recipes-grid">
+                {% for recipe in profile.user.recipe_set.all %}
+                    <div class="recipe-card">
+                        <div class="recipe-image">
+                            {% if recipe.image %}
+                                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+                            {% else %}
+                                <div class="recipe-placeholder">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                            {% endif %}
+
+                            {% if recipe.tags %}
+                                <div class="recipe-tags">
+                                    {% for tag in recipe.get_tag_choices_list %}
+                                        <span class="recipe-tag">{{ tag|title }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="recipe-content">
+                            <h3 class="recipe-title">{{ recipe.title }}</h3>
+                            <p class="recipe-description">{{ recipe.description|truncatewords:15 }}</p>
+
+                            <div class="recipe-meta">
+                                <span class="recipe-date">{{ recipe.created_at|timesince }} ago</span>
+                            </div>
+
+                            <div class="recipe-actions">
+                                <a href="{% url 'recipe_detail' recipe.slug %}" class="recipe-link">
+                                    View Recipe <i class="fas fa-arrow-right"></i>
+                                </a>
+                                {% if request.user == profile.user %}
+                                    <a href="{% url 'edit_recipe' recipe.slug %}" class="edit-button">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-utensils empty-icon"></i>
+                <h4>No recipes yet</h4>
+                <p>{{ profile.user.first_name|default:profile.user.username }} hasn't shared any recipes yet.</p>
+                {% if request.user == profile.user %}
+                    <a href="{% url 'create_recipe' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Share Your First Recipe
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
 
         <!-- Back to Home -->
         <div class="navigation-section">

@@ -1,10 +1,11 @@
 {% load static %}
+{% load recipe_filters %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Share a Recipe - Enibla</title>
+    <title>Edit Recipe - Enibla</title>
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
     <link rel="stylesheet" href="{% static 'css/recipe_form.css' %}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -17,11 +18,23 @@
                 <i class="fas fa-utensils"></i>
                 <h1>Enibla</h1>
             </div>
-            <h2>Share Your Recipe</h2>
-            <p>Share your culinary creation with the Enibla community</p>
+            <h2>Edit Your Recipe</h2>
+            <p>Update your recipe details and share it with the community</p>
         </div>
 
-        <form id="recipeForm" method="post" enctype="multipart/form-data" action="{% url 'create_recipe' %}">
+        {% if error_message %}
+        <div class="alert alert-danger">
+            {{ error_message }}
+        </div>
+        {% endif %}
+
+        {% if success_message %}
+        <div class="alert alert-success">
+            {{ success_message }}
+        </div>
+        {% endif %}
+
+        <form id="recipeForm" method="post" enctype="multipart/form-data" action="{% url 'edit_recipe' recipe.slug %}">
             {% csrf_token %}
             
             <!-- Recipe Image Section -->
@@ -34,9 +47,12 @@
                     <div class="recipe-image-upload">
                         <div class="image-preview-container">
                             <div class="image-preview" id="imagePreview">
+                                {% if recipe.image %}
+                                <img id="recipeImagePreview" src="{{ recipe.image.url }}" alt="Recipe preview">
+                                {% else %}
                                 <i class="fas fa-image preview-icon"></i>
                                 <p class="preview-text">Click to upload recipe photo</p>
-                                <img id="recipeImagePreview" style="display: none;" alt="Recipe preview">
+                                {% endif %}
                             </div>
                             <button type="button" class="upload-overlay-btn" id="uploadOverlayBtn">
                                 <i class="fas fa-upload"></i>
@@ -45,7 +61,9 @@
                         <input type="file" id="recipeImage" name="image" accept="image/*" style="display: none;">
                         <div class="upload-actions">
                             <button type="button" class="btn btn-outline" id="changeImageBtn">Upload Photo</button>
-                            <button type="button" class="btn btn-outline" id="removeImageBtn" style="display: none;">Remove</button>
+                            {% if recipe.image %}
+                            <button type="button" class="btn btn-outline" id="removeImageBtn">Remove</button>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -60,14 +78,14 @@
                 <div class="card-content">
                     <div class="form-group">
                         <label for="title">Recipe Title *</label>
-                        <input type="text" id="title" name="title" required placeholder="Give your recipe a catchy name">
+                        <input type="text" id="title" name="title" value="{{ recipe.title }}" required placeholder="Give your recipe a catchy name">
                     </div>
                     
                     <div class="form-group">
                         <label for="description">Description *</label>
-                        <textarea id="description" name="description" required placeholder="Describe your recipe, what makes it special, or share the story behind it..." maxlength="500"></textarea>
+                        <textarea id="description" name="description" required placeholder="Describe your recipe, what makes it special, or share the story behind it..." maxlength="500">{{ recipe.description }}</textarea>
                         <div class="char-counter">
-                            <span id="descCharCount">0</span>/500 characters
+                            <span id="descCharCount">{{ recipe.description|length }}</span>/500 characters
                         </div>
                     </div>
                 </div>
@@ -82,7 +100,7 @@
                 <div class="card-content">
                     <div class="form-group">
                         <label for="ingredients">Ingredients *</label>
-                        <textarea id="ingredients" name="ingredients" required placeholder="List each ingredient on a new line:&#10;• 2 cups all-purpose flour&#10;• 1 tsp baking powder&#10;• 1/2 cup sugar&#10;• 2 large eggs" rows="8"></textarea>
+                        <textarea id="ingredients" name="ingredients" required placeholder="List each ingredient on a new line:&#10;• 2 cups all-purpose flour&#10;• 1 tsp baking powder&#10;• 1/2 cup sugar&#10;• 2 large eggs" rows="8">{{ recipe.ingredients }}</textarea>
                         <div class="ingredient-helper">
                             <i class="fas fa-lightbulb"></i>
                             <span>Tip: Use bullet points or numbers to make your ingredients easy to read</span>
@@ -100,11 +118,7 @@
                 <div class="card-content">
                     <div class="form-group">
                         <label for="instructions">Instructions *</label>
-                        <textarea id="instructions" name="instructions" required placeholder="Write clear, step-by-step instructions:&#10;1. Preheat oven to 350°F (175°C)&#10;2. In a large bowl, mix flour and baking powder&#10;3. In another bowl, cream butter and sugar..." rows="10"></textarea>
-                        <div class="instruction-helper">
-                            <i class="fas fa-lightbulb"></i>
-                            <span>Tip: Number your steps and include cooking times and temperatures</span>
-                        </div>
+                        <textarea id="instructions" name="instructions" required placeholder="Write clear, step-by-step instructions..." rows="10">{{ recipe.instructions }}</textarea>
                     </div>
                 </div>
             </div>
@@ -117,9 +131,9 @@
                 </div>
                 <div class="card-content">
                     <div class="tags-grid">
-                        {% for tag_value, tag_label in tag_choices %}
+                        {% for tag_value, tag_label in all_tags %}
                         <div class="tag-item">
-                            <input type="checkbox" id="tag_{{ tag_value }}" name="tags" value="{{ tag_value }}">
+                            <input type="checkbox" id="tag_{{ tag_value }}" name="tags" value="{{ tag_value }}" {% if tag_value in recipe.tags|split_tags %}checked{% endif %}>
                             <label for="tag_{{ tag_value }}" class="tag-label">
                                 <i class="fas fa-{% if tag_value == 'breakfast' %}coffee{% elif tag_value == 'lunch' %}hamburger{% elif tag_value == 'dinner' %}utensils{% elif tag_value == 'dessert' %}ice-cream{% elif tag_value == 'snack' %}cookie-bite{% elif tag_value == 'fasting' %}moon{% endif %}"></i>
                                 {{ tag_label }}
@@ -135,22 +149,19 @@
                 </div>
             </div>
 
-            <!-- Submit Button -->
-            <div class="submit-section">
+            <!-- Navigation -->
+            <div class="navigation-section">
+                <a href="{% url 'profile_detail' username=request.user.username %}" class="btn btn-secondary">
+                    <i class="fas fa-user"></i> Go Back to Profile
+                </a>
+                <a href="{% url 'recipe_detail' recipe.slug %}" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Back to Recipe
+                </a>
                 <button type="submit" class="btn btn-primary" id="submitBtn">
-                    <i class="fas fa-share"></i>
-                    Share Recipe
+                    <i class="fas fa-save"></i> Save Changes
                 </button>
             </div>
         </form>
-
-        <!-- Navigation -->
-        <div class="navigation-section">
-            <a href="#" class="btn btn-outline">
-                <i class="fas fa-arrow-left"></i>
-                Back to Profile
-            </a>
-        </div>
     </div>
 
     <script src="{% static 'js/recipe_form.js' %}"></script>
