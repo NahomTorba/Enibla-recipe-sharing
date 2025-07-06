@@ -214,11 +214,7 @@
   opacity: 1;
 }
 
-.recipe-actions {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-}
+
 
 .action-btn {
   width: 40px;

@@ -41,3 +41,23 @@
 .edit-button i {
     font-size: 1.2rem;
 }
+
+.delete-button {
+    background: none;
+    border: none;
+    color: #e53e3e;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.delete-button:hover {
+    background-color: #fff5f5;
+}
+.delete-button i {
+    font-size: 1.2rem;
+}
+.delete-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.5);
+}
