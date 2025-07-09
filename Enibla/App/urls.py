@@ -5,6 +5,8 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import homepage, recipe_detail
+from django.contrib import admin
+from django.urls import include
 
 urlpatterns = [
     # Authentication URLs
@@ -43,4 +45,20 @@ if settings.DEBUG:
 urlpatterns = [
     path('', homepage, name='homepage'),
     path('recipe/<int:pk>/', recipe_detail, name='recipe_detail'),
+]
+
+
+# app/urls.py
+urlpatterns = [
+    # ... other url patterns ...
+    path('recipes/<int:pk>/', recipe_detail, name='recipe_detail'),
+]
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('App.urls')),  # 👈 this includes your app's URLs
+]
+
+urlpatterns = [
+    path('', views.homepage, name='homepage'),  # 👈 this handles the homepage
 ]

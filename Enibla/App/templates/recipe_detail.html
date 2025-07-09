@@ -14,3 +14,13 @@
     <p><strong>Servings:</strong> {{ recipe.servings }}</p>
 </body>
 </html>
+
+<h1>{{ recipe.title }}</h1>
+<p>{{ recipe.description }}</p>
+<p><strong>Ingredients:</strong><br>{{ recipe.ingredients|linebreaks }}</p>
+<p><strong>Instructions:</strong><br>{{ recipe.instructions|linebreaks }}</p>
+<p>Prep Time: {{ recipe.prep_time }} minutes</p>
+<p>Cook Time: {{ recipe.cook_time }} minutes</p>
+<p>Servings: {{ recipe.servings }}</p>
+<p>Views: {{ recipe.views }}</p>
+

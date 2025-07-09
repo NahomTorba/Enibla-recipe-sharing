@@ -296,3 +296,10 @@ def homepage(request):
 def recipe_detail(request, pk):
     recipe = get_object_or_404(Recipe, pk=pk)
     return render(request, 'recipe_detail.html', {'recipe': recipe})
+
+#recipe_detail view
+def recipe_detail(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    recipe.increment_views()  # Increment view count
+    return render(request, 'recipe_detail.html', {'recipe': recipe})
+

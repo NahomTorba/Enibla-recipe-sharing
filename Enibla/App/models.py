@@ -86,3 +86,26 @@ class Recipe(models.Model):
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
 
+#Recipe model
+class Recipe(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    ingredients = models.TextField()
+    instructions = models.TextField()
+    prep_time = models.IntegerField(default=0)
+    cook_time = models.IntegerField(default=0)
+    servings = models.IntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    views = models.PositiveIntegerField(default=0)
+    is_featured = models.BooleanField(default=False)
+
+    # 🟢 Add your extra fields here
+    tags = models.CharField(max_length=200, blank=True)
+    image = models.ImageField(upload_to='recipes/', blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+
+    def increment_views(self):
+        self.views += 1
+        self.save()
