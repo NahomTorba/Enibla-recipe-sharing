@@ -136,7 +136,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Email settings using Mailtrap for development values from .env file
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_HOST = env('EMAIL_HOST', default='localhost')
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = env.int('EMAIL_PORT')

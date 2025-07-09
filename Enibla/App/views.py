@@ -11,9 +11,11 @@ from .models import UserProfile, Recipe
 from .forms import UserProfileForm, RecipeForm
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
-
 from django.views.generic import ListView
 from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404
+
+
 
 # constants
 CUISINE_CHOICES = [ ('Ethiopian', 'Ethiopian'), ('Eritrea', 'Eritrea'), ('African', 'African'), ('Italian', 'Italian'),('Mexican', 'Mexican'),('Chinese', 'Chinese'),('Japanese', 'Japanese'),('Indian', 'Indian'),('French', 'French'),('American', 'American'),('Korean', 'Korean'),('Spanish', 'Spanish'),('Middle Eastern', 'Middle Eastern'),('Brazilian', 'Brazilian'),('British', 'British')]
@@ -285,3 +287,12 @@ def recipe_list_view(request):
     }
     
     return render(request, 'recipes/recipe_list.html', context)
+
+# app/views.py
+def homepage(request):
+    featured_recipes = Recipe.objects.filter(is_featured=True).order_by('-created_at')[:5]
+    return render(request, 'homepage.html', {'featured_recipes': featured_recipes})
+
+def recipe_detail(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    return render(request, 'recipe_detail.html', {'recipe': recipe})

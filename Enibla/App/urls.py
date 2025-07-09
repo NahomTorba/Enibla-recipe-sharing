@@ -4,7 +4,7 @@ from .views import RecipeListView
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
-
+from .views import homepage, recipe_detail
 
 urlpatterns = [
     # Authentication URLs
@@ -37,3 +37,10 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# app/urls.py
+
+
+urlpatterns = [
+    path('', homepage, name='homepage'),
+    path('recipe/<int:pk>/', recipe_detail, name='recipe_detail'),
+]

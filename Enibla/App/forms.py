@@ -290,26 +290,30 @@ class UserProfileForm(forms.ModelForm):
 class RecipeForm(forms.ModelForm):
     class Meta:
         model = Recipe
-        fields = ['title', 'description', 'ingredients', 'instructions', 'image']
+        fields = ['title', 'description', 'ingredients', 'instructions', 'image', 'tags']
         widgets = {
             'title': forms.TextInput(attrs={
                 'placeholder': 'Give your recipe a catchy name',
                 'class': 'form-control'
             }),
             'description': forms.Textarea(attrs={
-                'placeholder': 'Describe your recipe, what makes it special, or share the story behind it...',
+                'placeholder': 'Describe your recipe...',
                 'maxlength': '500',
                 'rows': 4,
                 'class': 'form-control'
             }),
             'ingredients': forms.Textarea(attrs={
-                'placeholder': 'List each ingredient on a new line:\n• 2 cups all-purpose flour\n• 1 tsp baking powder\n• 1/2 cup sugar\n• 2 large eggs',
+                'placeholder': 'List ingredients...',
                 'rows': 8,
                 'class': 'form-control'
             }),
             'instructions': forms.Textarea(attrs={
-                'placeholder': 'Write clear, step-by-step instructions:\n1. Preheat oven to 350°F (175°C)\n2. In a large bowl, mix flour and baking powder\n3. In another bowl, cream butter and sugar...',
+                'placeholder': 'Write instructions...',
                 'rows': 10,
+                'class': 'form-control'
+            }),
+            'tags': forms.TextInput(attrs={
+                'placeholder': 'e.g. breakfast,lunch',
                 'class': 'form-control'
             }),
         }
@@ -329,11 +333,12 @@ class RecipeForm(forms.ModelForm):
     def clean_ingredients(self):
         ingredients = self.cleaned_data['ingredients']
         if len(ingredients.strip()) < 10:
-            raise forms.ValidationError("Please provide a detailed list of ingredients.")
+            raise forms.ValidationError("Provide a detailed list of ingredients.")
         return ingredients
 
     def clean_instructions(self):
         instructions = self.cleaned_data['instructions']
         if len(instructions.strip()) < 20:
-            raise forms.ValidationError("Please provide detailed cooking instructions.")
+            raise forms.ValidationError("Provide detailed cooking instructions.")
         return instructions
+    
