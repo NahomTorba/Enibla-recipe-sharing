@@ -291,26 +291,6 @@ def update_recipe(request, pk):
         messages.error(self.request, 'Please correct the errors below.')
         return super().form_invalid(form)
 
-class RecipeDetailView(DetailView):
-    """
-    View for displaying recipe details.
-    """
-    model = Recipe
-    template_name = 'recipes/recipe_detail.html'
-    context_object_name = 'recipe'
-
-class RecipeListView(ListView):
-    """
-    View for listing all recipes.
-    """
-    model = Recipe
-    template_name = 'recipes/recipe_list.html'
-    context_object_name = 'recipes'
-    paginate_by = 10
-    
-    def get_queryset(self):
-        return Recipe.objects.select_related('author').all()
-
 
 @login_required
 def edit_recipe(request, slug):
@@ -567,24 +547,7 @@ def save_recipe(request, slug):
         'message': 'Recipe saved!' if saved else 'Recipe removed from saved'
     })
 
-class RecipeListView(ListView):
-    model = Recipe
-    template_name = 'recipes/recipe_list.html'
-    context_object_name = 'recipes'
-    paginate_by = 12  # Show 12 recipes per page
-    
-    def get_queryset(self):
-        """
-        Return all active recipes ordered by creation date (most recent first)
-        """
-        return Recipe.objects.all().order_by('-created_at')
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['total_recipes'] = self.get_queryset().count()
-        return context
 
-# Alternative function-based view (if you prefer)
 def recipe_list_view(request):
     """
     Function-based view alternative for recipe list

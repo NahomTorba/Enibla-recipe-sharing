@@ -3,7 +3,6 @@ from . import views
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import RecipeListView
 
 
 urlpatterns = [
@@ -36,7 +35,7 @@ urlpatterns = [
     path('recipes/<slug:slug>/edit/', views.edit_recipe, name='edit_recipe'),
     path('recipes/<slug:slug>/delete/', views.delete_recipe, name='delete_recipe'),
 
-    path('recipes/', RecipeListView.as_view(), name='recipe_list'),
+    path('recipes/', views.recipe_list_view, name='recipe_list'),
 
     # URLs for detailed recipe view
     path('recipe/<slug:slug>/', views.recipe_detail, name='recipe_detail'),
