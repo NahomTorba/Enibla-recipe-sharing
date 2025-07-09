@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'your_css_file.css' %}">
+</head>
+<body>
+    <h1>Trending Recipes</h1>
+    <ul>
+        {% for recipe in featured_recipes %}
+            <li>
+                <h2>{{ recipe.title }}</h2>
+                <p>{{ recipe.description }}</p>
+                <a href="{% url 'recipe_detail' recipe.pk %}">View Recipe</a>
+            </li>
+        {% empty %}
+            <li>No featured recipes available.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
