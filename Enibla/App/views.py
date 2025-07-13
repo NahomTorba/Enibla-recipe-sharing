@@ -150,14 +150,15 @@ def profile_create(request):
 
 def profile_detail(request, username):
     try:
-        user = User.objects.get(username=username)
-        profile = UserProfile.objects.get(user=user)
-    except (User.DoesNotExist, UserProfile.DoesNotExist):
+        profile = UserProfile.objects.select_related('user').get(user__username=username)
+        recipes = Recipe.objects.filter(author=profile).order_by('-created_at')
+    except (UserProfile.DoesNotExist):
         messages.error(request, 'Profile not found.')
         return redirect('home')
     
     context = {
         'profile': profile,
+        'recipes': recipes,
     }
     return render(request, 'profile/profile_detail.html', context)
 

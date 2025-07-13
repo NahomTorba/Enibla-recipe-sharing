@@ -131,7 +131,6 @@
             </div>
         </div>
 
-        <!-- Recent Recipes Section (Placeholder for future features) -->
         <!-- Recent Recipes Section -->
 <div class="card">
     <div class="card-header">
@@ -152,9 +151,9 @@
     {% endif %} 
 
     <div class="profile-recipes">
-        {% if profile.user.recipe_set.all %}
+        {% if profile.recipes.exists %}
             <div class="recipes-grid">
-                {% for recipe in profile.user.recipe_set.all %}
+                {% for recipe in profile.user.all %}
                     <div class="recipe-card">
                         <div class="recipe-image">
                             {% if recipe.image %}
