@@ -128,11 +128,10 @@ def profile_create(request):
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            profile = form.save(commit=False)
-            profile.user = request.user
+            profile = form.save()
 
             favorite_cuisines = request.POST.getlist('favorite_cuisines')
-            profile.favorite_cuisines = ','.join(favorite_cuisines)
+            profile.favorite_cuisines = ','.join(favorite_cuisines) if favorite_cuisines else ''
 
             profile.save()
             messages.success(request, 'Profile created successfully!')
@@ -223,8 +222,6 @@ def edit_profile(request):
     return render(request, 'profile/edit_profile.html', context)
     
 
-from django.contrib.auth.decorators import login_required
-
 @login_required
 @require_http_methods(["GET", "POST"])
 def create_recipe(request):
@@ -261,36 +258,6 @@ def create_recipe(request):
         'tag_choices': TAG_CHOICES,
     }
     return render(request, 'recipes/create_recipe.html', context)
-class RecipeUpdateView(AuthorRequiredMixin, UpdateView):
-    
-    model = Recipe
-    form_class = RecipeForm
-    template_name = 'recipes/recipe_update.html'
-    context_object_name = 'recipe'
-   
-def update_recipe(request, pk):
-   
-    # Get the recipe object or return 404 if not found
-    recipe = get_object_or_404(Recipe, pk=pk)
-    
-    # Check if the current user is the author of the recipe
-    if recipe.author != request.user:
-        messages.error(request, "You don't have permission to edit this recipe.")
-        return redirect('recipe_detail', pk=recipe.pk)
-    
-    
-    def get_success_url(self):
-        messages.success(self.request, 'Recipe updated successfully!')
-        return self.object.get_absolute_url()
-    
-    def form_valid(self, form):
-        messages.success(self.request, 'Your recipe has been updated!')
-        return super().form_valid(form)
-    
-    def form_invalid(self, form):
-        messages.error(self.request, 'Please correct the errors below.')
-        return super().form_invalid(form)
-
 
 @login_required
 def edit_recipe(request, slug):
@@ -325,7 +292,7 @@ def edit_recipe(request, slug):
             'form': form,
             'all_tags': TAG_CHOICES
         }
-        return render(request, 'edit_recipe.html', context)
+        return render(request, 'recipes/edit_recipe.html', context)
 
     except Recipe.DoesNotExist:
         messages.error(request, 'Recipe not found.')
@@ -371,8 +338,6 @@ def delete_recipe(request, slug):
         messages.error(request, 'Recipe not found.')
         return redirect('index')
     
-
-# Removed redundant edit_recipe view that used recipe_id parameter
 
 def recipe_detail(request, slug):
     """Display detailed view of a single recipe"""
@@ -503,28 +468,10 @@ def delete_review(request, review_id):
     if request.method == 'POST':
         review.delete()
         messages.success(request, 'Your review has been deleted!')
-    else:
-        messages.error(request, 'Invalid request method for deletion.')
-    
-    return redirect('recipe_detail', slug=recipe.slug)
-
-
-
-@login_required
-def delete_review(request, review_id):
-    """Delete a review from a recipe using review_id"""
-    review = get_object_or_404(Review, id=review_id, user=request.user)
-    recipe = review.recipe
-
-    if request.method == 'POST':
-        review.delete()
-        messages.success(request, 'Your review has been deleted!')
         return redirect('recipe_detail', slug=recipe.slug)
     
     messages.error(request, 'You can only delete your own reviews.')
     return redirect('recipe_detail', slug=recipe.slug)
-
-# edit review function below
 
 @login_required
 @require_POST
