@@ -7,6 +7,7 @@
     <title>Enibla - Discover & Share Amazing Recipes</title>
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/recipe_card.css' %}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -280,9 +281,24 @@
                                 <span class="recipe-date">{{ recipe.created_at|timesince }} ago</span>
                             </div>
                             
-                            <a href="#" class="recipe-link">
-                                View Recipe <i class="fas fa-arrow-right"></i>
-                            </a>
+                            <div class="recipe-actions">
+                                <a href="{% url 'recipe_detail' recipe.slug %}" class="recipe-link">
+                                    View Recipe <i class="fas fa-arrow-right"></i>
+                                </a>
+                                {% if recipe.author.user == request.user %}
+                                <div>
+                                    <a href="{% url 'edit_recipe' recipe.slug %}" class="edit-button" title="Edit Recipe">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" action="{% url 'delete_recipe' recipe.slug %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this recipe?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="delete-button" title="Delete Recipe">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 {% empty %}
@@ -386,7 +402,7 @@
                 </div>
                 <p class="footer-text">Connecting food lovers through amazing recipes</p>
                 <div class="footer-links">
-                    <a href="#">Browse Recipes</a>
+                    <a href="{% url 'recipe_list' %}">Browse Recipes</a>
                     {% if user.is_authenticated %}
                         <a href="{% url 'create_recipe' %}">Share Recipe</a>
                         <a href="{% url 'my_profile' %}">My Profile</a>

@@ -146,7 +146,7 @@
 
         <!-- Navigation -->
         <div class="navigation-section">
-            <a href="#" class="btn btn-outline">
+            <a href="{% url 'profile_detail' username=request.user.username %}" class="btn btn-outline">
                 <i class="fas fa-arrow-left"></i>
                 Back to Profile
             </a>
@@ -154,5 +154,18 @@
     </div>
 
     <script src="{% static 'js/recipe_form.js' %}"></script>
+
+    {% if form.errors %}
+    <ul class="form-errors">
+        {% for field in form %}
+            {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 </body>
 </html>
