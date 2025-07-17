@@ -175,7 +175,7 @@ function showModal(title, message) {
     if (title.includes("Saved") || title.includes("Removed")) {
       setTimeout(() => {
         hideModal()
-      }, 3000)
+      }, 5000)
     }
   }
 }

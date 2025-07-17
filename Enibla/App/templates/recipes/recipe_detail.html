@@ -178,10 +178,16 @@
 
                         <!-- Action Buttons -->
                         <div class="recipe-actions">
-                            {% if user.is_authenticated %}
-                                <button class="btn btn-secondary save-btn" id="saveRecipeBtn" data-recipe-id="{{ recipe.id }}">
-                                    <i class="fas fa-bookmark"></i>
-                                    <span class="save-text">Save Recipe</span>
+                            {% if user.is_authenticated and user.userprofile and user.userprofile != recipe.author %}
+                                <button class="btn btn-secondary save-btn" id="saveRecipeBtn" data-recipe-id="{{ recipe.slug }}" title="Save Recipe">
+                                    {% csrf_token %}
+                                    {% if is_saved %}
+                                        <i class="fas fa-bookmark active"></i>
+                                        <span class="save-text">Saved</span>
+                                    {% else %}
+                                        <i class="fas fa-bookmark"></i>
+                                        <span class="save-text">Save Recipe</span>
+                                    {% endif %}
                                 </button>
                             {% endif %}
                             {% if user.is_authenticated and user.userprofile and user.userprofile == recipe.author %}

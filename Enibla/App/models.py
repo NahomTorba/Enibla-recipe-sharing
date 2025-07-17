@@ -127,7 +127,7 @@ class Review(models.Model):
         ordering = ['-created_at']
 
 class SavedRecipe(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_recipes')
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     saved_at = models.DateTimeField(auto_now_add=True)
     

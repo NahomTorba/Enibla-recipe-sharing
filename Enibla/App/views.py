@@ -75,7 +75,6 @@ def login_view(request):
             
             if user is not None:
                 login(request, user)
-                messages.success(request, f'Welcome back, {user.first_name if user.first_name else username}!')
                 
                 # Redirect to the next page if provided, otherwise to profile
                 next_page = request.POST.get('next')
@@ -155,10 +154,15 @@ def profile_detail(request, username):
     except (UserProfile.DoesNotExist):
         messages.error(request, 'Profile not found.')
         return redirect('home')
-    
+
+    saved_recipes = []
+    if request.user.is_authenticated and request.user == profile.user:
+        saved_recipes = Recipe.objects.filter(savedrecipe__user=request.user)
+
     context = {
         'profile': profile,
         'recipes': recipes,
+        'saved_recipes': saved_recipes,
     }
     return render(request, 'profile/profile_detail.html', context)
 
@@ -295,27 +299,6 @@ def edit_recipe(request, slug):
         }
         return render(request, 'recipes/edit_recipe.html', context)
 
-    except Recipe.DoesNotExist:
-        messages.error(request, 'Recipe not found.')
-        return redirect('index')
-
-
-@login_required
-def recipe_detail(request, slug):
-    try:
-        recipe = Recipe.objects.get(slug=slug)
-        
-        # Get related recipes by searching for recipes that share any of the same tags
-        related_recipes = Recipe.objects.filter(
-            tags__contains=recipe.tags
-        ).exclude(slug=slug)[:3]
-        
-        context = {
-            'recipe': recipe,
-            'related_recipes': related_recipes,
-            'tag_choices': TAG_CHOICES
-        }
-        return render(request, 'recipe_detail.html', context)
     except Recipe.DoesNotExist:
         messages.error(request, 'Recipe not found.')
         return redirect('index')
@@ -475,7 +458,7 @@ def delete_review(request, review_id):
     return redirect('recipe_detail', slug=recipe.slug)
 
 @login_required
-@require_POST
+@require_http_methods(["POST"])
 def save_recipe(request, slug):
     """Save or unsave a recipe for the user"""
     recipe = get_object_or_404(Recipe, slug=slug)
@@ -486,15 +469,33 @@ def save_recipe(request, slug):
     
     if not created:
         saved_recipe.delete()
-        saved = False
+        return JsonResponse({
+            'success': True,
+            'saved': False,
+            'message': 'Recipe removed from saved recipes.'
+        })
     else:
-        saved = True
-    
-    return JsonResponse({
-        'saved': saved,
-        'message': 'Recipe saved!' if saved else 'Recipe removed from saved'
-    })
+        return JsonResponse({
+            'success': True,
+            'saved': True,
+            'message': 'Recipe saved!'
+        })
 
+@login_required
+def check_saved_recipe(request, slug):
+    recipe = get_object_or_404(Recipe, slug=slug)
+    is_saved = SavedRecipe.objects.filter(user=request.user, recipe=recipe).exists()
+    return JsonResponse({'is_saved': is_saved})
+
+@login_required
+@require_http_methods(["POST"])
+def unsave_recipe(request, slug):
+    recipe = get_object_or_404(Recipe, slug=slug)
+    try:
+        SavedRecipe.objects.get(user=request.user, recipe=recipe).delete()
+        return JsonResponse({'success': True, 'message': 'Recipe unsaved successfully.'})
+    except SavedRecipe.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Recipe not found in saved recipes.'})
 
 def recipe_list_view(request):
     """
