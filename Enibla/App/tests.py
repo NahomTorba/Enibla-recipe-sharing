@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
+from django.urls import reverse
 from .models import UserProfile, Recipe
 from .forms import RecipeForm
 
@@ -85,3 +86,51 @@ class RecipeFormTests(TestCase):
         self.assertIn('description', form.errors)
         self.assertIn('ingredients', form.errors)
         self.assertIn('instructions', form.errors)
+
+class RecipeDetailViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = UserProfile.objects.create(username='testuser', bio='Passionate chef')
+
+        self.recipe = Recipe.objects.create(
+            author=self.user,
+            title="Spicy Lentil Stew",
+            slug=slugify("Spicy Lentil Stew"),
+            description="Ethiopian-inspired lentils with berbere spice.",
+            ingredients="1 cup lentils, berbere, onion, garlic",
+            instructions="Simmer lentils with spices for 45 minutes.",
+            tags="dinner",
+            image=SimpleUploadedFile(name='lentils.jpg', content=b'image_bytes', content_type='image/jpeg'),
+            created_at=timezone.now(),
+            updated_at=timezone.now()
+        )
+
+    def test_detail_view_status_code(self):
+        url = reverse('recipe_detail', kwargs={'slug': self.recipe.slug})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_detail_view_template(self):
+        url = reverse('recipe_detail', kwargs={'slug': self.recipe.slug})
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'your_app/recipe_detail.html')  # adjust as needed
+
+    def test_layout_contains_key_fields(self):
+        url = reverse('recipe_detail', kwargs={'slug': self.recipe.slug})
+        response = self.client.get(url)
+
+        self.assertContains(response, self.recipe.title)
+        self.assertContains(response, self.recipe.description)
+        self.assertContains(response, self.recipe.ingredients)
+        self.assertContains(response, self.recipe.instructions)
+        self.assertContains(response, "Dinner")  # assuming you're rendering the tag nicely
+
+    def test_image_display_on_page(self):
+        url = reverse('recipe_detail', kwargs={'slug': self.recipe.slug})
+        response = self.client.get(url)
+        self.assertContains(response, 'recipe_images/lentils.jpg')
+
+    def test_404_for_missing_recipe(self):
+        url = reverse('recipe_detail', kwargs={'slug': 'non-existent-slug'})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
