@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView
 from django.core.paginator import Paginator
+from django.contrib.auth.forms import AuthenticationForm
 from .forms import SignUpForm, UserProfileForm, RecipeForm
 from .models import UserProfile, Recipe
 from .email_utils import send_confirmation_email
@@ -33,11 +34,12 @@ def signup(request):
             
             # Automatically log in the user
             user = authenticate(username=username, password=form.cleaned_data.get('password1'))
-            if user:
+            if user is not None:
                 login(request, user)
                 messages.success(request, 'Welcome to Enibla! Please create your profile to get started.')
                 return redirect('index')
             else:
+                messages.error(request, 'Failed to authenticate user after signup')
                 return redirect('login')
         else:
             messages.error(request, 'Please correct the errors below.')
