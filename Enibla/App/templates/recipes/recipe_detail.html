@@ -364,6 +364,21 @@
 
                 <!-- Sidebar -->
                 <aside class="recipe-sidebar">
+                    
+                    <!-- Recipe Tags -->
+                    {% if recipe.tags %}
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-tags"></i>
+                            Categories
+                        </h3>
+                        <div class="recipe-tags">
+                            {% for tag in recipe.get_tag_choices_list %}
+                            <span class="tag">{{ tag|title }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
                     <!-- Ingredients Checklist -->
                     <div class="sidebar-card">
                         <h3 class="sidebar-title">
@@ -374,21 +389,6 @@
                             <!-- JavaScript will populate this -->
                         </div>
                     </div>
-
-                    <!-- Recipe Tags -->
-                    {% if recipe.tags %}
-                    <div class="sidebar-card">
-                        <h3 class="sidebar-title">
-                            <i class="fas fa-tags"></i>
-                            Categories
-                        </h3>
-                        <div class="recipe-tags">
-                            {% for tag in recipe.get_tag_choices_list %}
-                                <span class="tag">{{ tag|title }}</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
                 </aside>
             </div>
         </div>

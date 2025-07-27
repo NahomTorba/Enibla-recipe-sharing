@@ -88,6 +88,7 @@ class Recipe(models.Model):
     def get_update_url(self):
         return reverse('recipe_update', kwargs={'slug': self.slug})
 
+    @property
     def get_tag_choices_list(self):
         if not self.tags:
             return []
@@ -98,7 +99,7 @@ class Recipe(models.Model):
                 if value == tag:
                     tag_list.append(display)
                     break
-        return tag_list
+        return list(tag_list)
 
     @property
     def average_rating(self):
