@@ -5,7 +5,6 @@ from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
     bio = models.TextField(max_length=500, blank=True, null=True)
@@ -39,7 +38,6 @@ class UserProfile(models.Model):
     def clean(self):
         super().clean()
         if self.favorite_cuisines:
-            # Validate that favorite_cuisines contains only valid choices
             cuisines = self.favorite_cuisines.split(',')
             valid_cuisines = [choice[0] for choice in self.CUISINE_CHOICES]
             if not all(cuisine in valid_cuisines for cuisine in cuisines):
@@ -105,7 +103,6 @@ class Recipe(models.Model):
     def clean(self):
         super().clean()
         if self.tags:
-            # Validate that tags contain only valid choices
             tags = self.tags.split(',')
             valid_tags = [choice[0] for choice in self.TAG_CHOICES]
             if not all(tag in valid_tags for tag in tags):
@@ -136,6 +133,7 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
+
 
 class Review(models.Model):
     recipe = models.ForeignKey(Recipe, related_name='reviews', on_delete=models.CASCADE)

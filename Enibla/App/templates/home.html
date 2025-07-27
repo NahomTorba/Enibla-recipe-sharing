@@ -23,7 +23,7 @@
 
             <!-- Search Bar -->
             <div class="nav-search">
-                <form class="search-form" method="get" action="#">
+                <form class="search-form" method="get" action="{% url 'recipe_list' %}">
                     <div class="search-input-container">
                         <i class="fas fa-search search-icon"></i>
                         <input type="text" name="q" placeholder="Search recipes, ingredients, or cuisines..." class="search-input" value="{{ request.GET.q|default:'' }}">
