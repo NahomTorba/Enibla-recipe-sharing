@@ -392,43 +392,6 @@ def delete_recipe(request, slug):
         return redirect('index')
     
 
-# Removed redundant edit_recipe view that used recipe_id parameter
-
-def recipe_detail(request, pk):
-    """Display detailed view of a single recipe"""
-    recipe = get_object_or_404(Recipe, pk=pk)
-    
-    '''# Calculate average rating
-    recipe.average_rating = recipe.reviews.aggregate(
-        avg_rating=Avg('rating')
-    )['avg_rating'] or 0'''
-    
-    #image url in the view
-    image_url = request.build_absolute_uri(recipe.image.url) if recipe.image else None
-    
-    # Get related recipes (same tags or author)
-    related_recipes = Recipe.objects.filter(
-        Q(tags__icontains=recipe.tags) | Q(author=recipe.author)
-    ).exclude(pk=recipe.pk).distinct()[:4]
-    
-    # Check if user has saved this recipe
-    is_saved = False
-    if request.user.is_authenticated:
-        is_saved = SavedRecipe.objects.filter(
-            user=request.user, 
-            recipe=recipe
-        ).exists()
-    
-    context = {
-        'recipe': recipe,
-        'related_recipes': related_recipes,
-        'is_saved': is_saved,
-        'review_form': ReviewForm(),
-        'image_url': image_url,
-    }
-    
-    return render(request, 'recipes/recipe_detail.html', context)
-
 @login_required
 @require_POST
 def add_review(request, pk):

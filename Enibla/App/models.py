@@ -94,7 +94,8 @@ class Recipe(models.Model):
     
     def get_update_url(self):
         return reverse('recipe_update', kwargs={'pk': self.pk})
-=======
+
+    def get_tag_choices_list(self):
         if self.tags:
             return [tag.strip() for tag in self.tags.split(',')]
         return []
