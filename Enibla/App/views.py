@@ -3,24 +3,15 @@ from django.contrib import messages
 from django.views.decorators.http import require_http_methods, require_POST
 from .forms import SignUpForm, ReviewForm
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from .email_utils import send_confirmation_email
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from .models import UserProfile, Recipe,Review,SavedRecipe
 from .forms import UserProfileForm, RecipeForm
 from django.contrib.auth.models import User
-from django.contrib.auth import logout
-from django.urls import reverse_lazy
-from django.views.generic import UpdateView, DetailView, ListView
-from django.core.exceptions import PermissionDenied
-from .mixins import AuthorRequiredMixin
-
 from django.http import JsonResponse
-from django.db.models import Avg, Q
-
-from django.views.generic import ListView
+from django.db.models import  Q
 from django.core.paginator import Paginator
 
 
