@@ -506,6 +506,9 @@ def recipe_list_view(request):
     # Get search query and tag filter from GET params
     query = request.GET.get('q', '').strip()
     tag = request.GET.get('tag', '').strip()
+    cuisine = request.GET.get('cuisine', '').strip()
+    difficulty = request.GET.get('difficulty', '').strip()
+    prep_time = request.GET.get('prep_time', '').strip()
 
     # Filter by search query (title, ingredients, tags)
     if query:
@@ -519,6 +522,18 @@ def recipe_list_view(request):
     if tag:
         recipes = recipes.filter(tags__icontains=tag)
 
+    # Filter by cuisine
+    if cuisine:
+        recipes = recipes.filter(cuisine=cuisine)
+
+    # Filter by difficulty
+    if difficulty:
+        recipes = recipes.filter(difficulty=difficulty)
+
+    # Filter by prep_time (less than or equal to user input)
+    if prep_time.isdigit():
+        recipes = recipes.filter(prep_time__lte=int(prep_time))
+
     # Pagination
     paginator = Paginator(recipes, 12)  # Show 12 recipes per page
     page_number = request.GET.get('page')
@@ -531,6 +546,11 @@ def recipe_list_view(request):
         'is_paginated': page_obj.has_other_pages(),
         'search_query': query,
         'active_tag': tag,
+        'selected_cuisine': cuisine,
+        'selected_difficulty': difficulty,
+        'selected_prep_time': prep_time,
+        'CUISINE_CHOICES': Recipe.CUISINE_CHOICES,
+        'DIFFICULTY_CHOICES': Recipe.DIFFICULTY_CHOICES,
     }
 
     return render(request, 'recipes/recipe_list.html', context)

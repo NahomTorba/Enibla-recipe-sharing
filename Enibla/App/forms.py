@@ -121,9 +121,24 @@ class UserProfileForm(forms.ModelForm):
 
 
 class RecipeForm(forms.ModelForm):
+    cuisine = forms.ChoiceField(
+        choices=Recipe.CUISINE_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    difficulty = forms.ChoiceField(
+        choices=Recipe.DIFFICULTY_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    prep_time = forms.IntegerField(
+        required=False,
+        min_value=1,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Preparation time (minutes)'})
+    )
     class Meta:
         model = Recipe
-        fields = ['title', 'description', 'ingredients', 'instructions', 'image']
+        fields = ['title', 'description', 'ingredients', 'instructions', 'image', 'cuisine', 'difficulty', 'prep_time']
         widgets = {
             'title': forms.TextInput(attrs={
                 'placeholder': 'Give your recipe a catchy name',
@@ -146,6 +161,19 @@ class RecipeForm(forms.ModelForm):
                 'class': 'form-control'
             }),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cuisine = cleaned_data.get('cuisine')
+        difficulty = cleaned_data.get('difficulty')
+        prep_time = cleaned_data.get('prep_time')
+        if cuisine == '':
+            cleaned_data['cuisine'] = None
+        if difficulty == '':
+            cleaned_data['difficulty'] = None
+        if prep_time in [None, '']:
+            cleaned_data['prep_time'] = None
+        return cleaned_data
 
     def clean_title(self):
         title = self.cleaned_data['title']

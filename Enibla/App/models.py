@@ -53,6 +53,22 @@ class Recipe(models.Model):
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])]
     )
 
+    # New fields for filtering
+    CUISINE_CHOICES = [
+        ('Ethiopian', 'Ethiopian'), ('Eritrea', 'Eritrea'), ('African', 'African'), ('Italian', 'Italian'),
+        ('Mexican', 'Mexican'), ('Chinese', 'Chinese'), ('Japanese', 'Japanese'), ('Indian', 'Indian'),
+        ('French', 'French'), ('American', 'American'), ('Korean', 'Korean'), ('Spanish', 'Spanish'),
+        ('Middle Eastern', 'Middle Eastern'), ('Brazilian', 'Brazilian'), ('British', 'British')
+    ]
+    DIFFICULTY_CHOICES = [
+        ('Easy', 'Easy'),
+        ('Medium', 'Medium'),
+        ('Hard', 'Hard'),
+    ]
+    cuisine = models.CharField(max_length=30, choices=CUISINE_CHOICES, blank=True)
+    difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, blank=True)
+    prep_time = models.PositiveIntegerField(null=True, blank=True, help_text="Preparation time in minutes")
+
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
@@ -80,7 +96,7 @@ class Recipe(models.Model):
                 img.save(self.image.path)
 
     def __str__(self):
-        return self.title
+        return f"{self.title} ({self.cuisine or 'No Cuisine'}, {self.difficulty or 'No Difficulty'}, {self.prep_time or '?'} min)"
 
     def get_absolute_url(self):
         return reverse('recipe_detail', kwargs={'slug': self.slug})
