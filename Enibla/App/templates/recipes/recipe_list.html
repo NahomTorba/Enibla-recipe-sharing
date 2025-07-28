@@ -25,10 +25,10 @@
 
             <!-- Search Bar -->
             <div class="nav-search">
-                <form class="search-form" method="get" action="#">
+                <form class="search-form" method="get" action="{% url 'recipe_list' %}">
                     <div class="search-input-container">
                         <i class="fas fa-search search-icon"></i>
-                        <input type="text" name="q" placeholder="Search recipes, ingredients, or cuisines..." class="search-input" value="{{ request.GET.q|default:'' }}">
+                        <input type="text" name="q" placeholder="Search recipes, ingredients, or cuisines..." class="search-input" value="{{ search_query|default:'' }}">
                         <button type="submit" class="search-btn">
                             <i class="fas fa-arrow-right"></i>
                         </button>
@@ -155,32 +155,27 @@
 
                 <!-- Search and Filter Section -->
                 <div class="search-filter-section">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="recipeSearch" placeholder="Search recipes, ingredients, or cuisines...">
-                    </div>
-                    <div class="filter-buttons">
-                        <button class="filter-btn active" data-filter="all">
-                            <i class="fas fa-th"></i>
-                            All
-                        </button>
-                        <button class="filter-btn" data-filter="breakfast">
-                            <i class="fas fa-coffee"></i>
-                            Breakfast
-                        </button>
-                        <button class="filter-btn" data-filter="lunch">
-                            <i class="fas fa-hamburger"></i>
-                            Lunch
-                        </button>
-                        <button class="filter-btn" data-filter="dinner">
-                            <i class="fas fa-drumstick-bite"></i>
-                            Dinner
-                        </button>
-                        <button class="filter-btn" data-filter="dessert">
-                            <i class="fas fa-ice-cream"></i>
-                            Dessert
-                        </button>
-                    </div>
+                    <form method="get" action="{% url 'recipe_list' %}" class="search-filter-form">
+                        <input type="text" name="q" placeholder="Search recipes, ingredients, or cuisines..." value="{{ search_query|default:'' }}" style="margin-right: 1em;">
+                        <button type="submit">Search</button>
+                        <div class="filter-buttons" style="margin-top: 1em;">
+                            <a href="{% url 'recipe_list' %}" class="filter-btn {% if not active_tag %}active{% endif %}">All</a>
+                            <a href="{% url 'recipe_list' %}?tag=breakfast{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-btn {% if active_tag == 'breakfast' %}active{% endif %}">Breakfast</a>
+                            <a href="{% url 'recipe_list' %}?tag=lunch{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-btn {% if active_tag == 'lunch' %}active{% endif %}">Lunch</a>
+                            <a href="{% url 'recipe_list' %}?tag=dinner{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-btn {% if active_tag == 'dinner' %}active{% endif %}">Dinner</a>
+                            <a href="{% url 'recipe_list' %}?tag=dessert{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-btn {% if active_tag == 'dessert' %}active{% endif %}">Dessert</a>
+                            <a href="{% url 'recipe_list' %}?tag=snack{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-btn {% if active_tag == 'snack' %}active{% endif %}">Snack</a>
+                            <a href="{% url 'recipe_list' %}?tag=fasting{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-btn {% if active_tag == 'fasting' %}active{% endif %}">Fasting</a>
+                        </div>
+                    </form>
+                    {% if search_query or active_tag %}
+                        <div class="current-filters" style="margin-top: 1em;">
+                            <strong>Filters:</strong>
+                            {% if search_query %} <span>Search: <em>{{ search_query }}</em></span> {% endif %}
+                            {% if active_tag %} <span>Tag: <em>{{ active_tag|title }}</em></span> {% endif %}
+                            <a href="{% url 'recipe_list' %}" style="margin-left: 1em;">Clear filters</a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 

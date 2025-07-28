@@ -24,7 +24,7 @@
 
             <!-- Search Bar -->
             <div class="nav-search">
-                <form class="search-form" method="get" action="#">
+                <form class="search-form" method="get" action="{% url 'recipe_list' %}">
                     <div class="search-input-container">
                         <i class="fas fa-search search-icon"></i>
                         <input type="text" name="q" placeholder="Search recipes, ingredients, or cuisines..." class="search-input" value="{{ request.GET.q|default:'' }}">
@@ -161,7 +161,7 @@
 
                 <!-- Quick Search -->
                 <div class="hero-search">
-                    <form class="hero-search-form" method="get" action="#">
+                    <form class="hero-search-form" method="get" action="{% url 'recipe_list' %}">
                         <div class="hero-search-container">
                             <i class="fas fa-search"></i>
                             <input type="text" name="q" placeholder="Search for recipes, ingredients, or cuisines..." value="{{ request.GET.q|default:'' }}">

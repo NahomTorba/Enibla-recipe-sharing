@@ -499,20 +499,38 @@ def unsave_recipe(request, slug):
 
 def recipe_list_view(request):
     """
-    Function-based view alternative for recipe list
+    Function-based view for recipe list with backend filtering
     """
     recipes = Recipe.objects.all().order_by('-created_at')
-    
+
+    # Get search query and tag filter from GET params
+    query = request.GET.get('q', '').strip()
+    tag = request.GET.get('tag', '').strip()
+
+    # Filter by search query (title, ingredients, tags)
+    if query:
+        recipes = recipes.filter(
+            Q(title__icontains=query) |
+            Q(ingredients__icontains=query) |
+            Q(tags__icontains=query)
+        )
+
+    # Filter by tag
+    if tag:
+        recipes = recipes.filter(tags__icontains=tag)
+
     # Pagination
     paginator = Paginator(recipes, 12)  # Show 12 recipes per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     context = {
         'recipes': page_obj,
         'total_recipes': recipes.count(),
         'page_obj': page_obj,
         'is_paginated': page_obj.has_other_pages(),
+        'search_query': query,
+        'active_tag': tag,
     }
-    
+
     return render(request, 'recipes/recipe_list.html', context)
