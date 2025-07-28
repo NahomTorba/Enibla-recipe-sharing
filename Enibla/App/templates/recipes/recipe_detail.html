@@ -176,6 +176,35 @@
                             {% endif %}
                         </div>
 
+                        <!-- Recipe Classification -->
+                        {% if recipe.cuisine or recipe.difficulty or recipe.prep_time %}
+                        <div class="recipe-classification">
+                            {% if recipe.cuisine %}
+                            <div class="classification-item">
+                                <i class="fas fa-globe"></i>
+                                <span class="classification-label">Cuisine:</span>
+                                <span class="classification-value">{{ recipe.cuisine }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if recipe.difficulty %}
+                            <div class="classification-item">
+                                <i class="fas fa-signal"></i>
+                                <span class="classification-label">Difficulty:</span>
+                                <span class="classification-value difficulty-{{ recipe.difficulty|lower }}">{{ recipe.difficulty }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if recipe.prep_time %}
+                            <div class="classification-item">
+                                <i class="fas fa-clock"></i>
+                                <span class="classification-label">Prep Time:</span>
+                                <span class="classification-value">{{ recipe.prep_time }} minutes</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
                         <!-- Action Buttons -->
                         <div class="recipe-actions">
                             {% if user.is_authenticated and user.userprofile and user.userprofile != recipe.author %}

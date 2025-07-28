@@ -276,9 +276,54 @@
 
 .recipe-description {
   color: #666;
-  margin-bottom: 1rem;
-  line-height: 1.5;
   font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+/* Recipe Classification Mini */
+.recipe-classification-mini {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.classification-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: white;
+  background: #ff6b35;
+}
+
+.classification-badge i {
+  font-size: 0.7rem;
+}
+
+.classification-badge.cuisine {
+  background: #6c757d;
+}
+
+.classification-badge.difficulty {
+  background: #28a745;
+}
+
+.classification-badge.difficulty-medium {
+  background: #ffc107;
+  color: #333;
+}
+
+.classification-badge.difficulty-hard {
+  background: #dc3545;
+}
+
+.classification-badge.prep-time {
+  background: #17a2b8;
 }
 
 .recipe-meta {

@@ -107,6 +107,54 @@
   color: #e55a2b;
 }
 
+/* Recipe Classification */
+.recipe-classification {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border-left: 4px solid #ff6b35;
+}
+
+.classification-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.classification-item i {
+  color: #ff6b35;
+  width: 16px;
+  font-size: 1rem;
+}
+
+.classification-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.classification-value {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Difficulty-specific colors */
+.difficulty-easy {
+  color: #28a745 !important;
+}
+
+.difficulty-medium {
+  color: #ffc107 !important;
+}
+
+.difficulty-hard {
+  color: #dc3545 !important;
+}
+
 .rating-display {
   display: flex;
   align-items: center;
@@ -863,6 +911,16 @@
     gap: 1rem;
   }
 
+  .recipe-classification {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.75rem;
+  }
+
+  .classification-item {
+    font-size: 0.9rem;
+  }
+
   .recipe-image {
     height: 250px;
   }
@@ -917,6 +975,14 @@
 
   .recipe-main {
     padding: 1rem;
+  }
+
+  .recipe-classification {
+    padding: 0.5rem;
+  }
+
+  .classification-item {
+    font-size: 0.85rem;
   }
 
   .sidebar-card {

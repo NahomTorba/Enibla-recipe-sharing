@@ -223,6 +223,30 @@
                             <h3 class="recipe-title">{{ recipe.title }}</h3>
                             <p class="recipe-description">{{ recipe.description|truncatewords:15 }}</p>
                             
+                            <!-- Recipe Classification -->
+                            {% if recipe.cuisine or recipe.difficulty or recipe.prep_time %}
+                            <div class="recipe-classification-mini">
+                                {% if recipe.cuisine %}
+                                <span class="classification-badge cuisine">
+                                    <i class="fas fa-globe"></i>
+                                    {{ recipe.cuisine }}
+                                </span>
+                                {% endif %}
+                                {% if recipe.difficulty %}
+                                <span class="classification-badge difficulty difficulty-{{ recipe.difficulty|lower }}">
+                                    <i class="fas fa-signal"></i>
+                                    {{ recipe.difficulty }}
+                                </span>
+                                {% endif %}
+                                {% if recipe.prep_time %}
+                                <span class="classification-badge prep-time">
+                                    <i class="fas fa-clock"></i>
+                                    {{ recipe.prep_time }}m
+                                </span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            
                             <div class="recipe-meta">
                                 <div class="recipe-author">
                                     {% if recipe.author.profile_image %}
