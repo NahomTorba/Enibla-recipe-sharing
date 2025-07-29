@@ -22,19 +22,6 @@
                 </a>
             </div>
 
-            <!-- Search Bar -->
-            <div class="nav-search">
-                <form class="search-form" method="get" action="{% url 'recipe_list' %}">
-                    <div class="search-input-container">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" name="q" placeholder="Search recipes, ingredients, or cuisines..." class="search-input" value="{{ request.GET.q|default:'' }}">
-                        <button type="submit" class="search-btn">
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
             <!-- Navigation Links -->
             <div class="nav-links">
                 <a href="{% url 'recipe_list' %}" class="nav-link">
@@ -143,7 +130,7 @@
                             <i class="fas fa-plus"></i>
                             Share Your Recipe
                         </a>
-                        <a href="#" class="btn btn-outline btn-large">
+                        <a href="{% url 'recipe_list' %}" class="btn btn-outline btn-large">
                             <i class="fas fa-search"></i>
                             Browse Recipes
                         </a>
@@ -152,7 +139,7 @@
                             <i class="fas fa-user-plus"></i>
                             Join Enibla
                         </a>
-                        <a href="#" class="btn btn-outline btn-large">
+                        <a href="{% url 'recipe_list' %}" class="btn btn-outline btn-large">
                             <i class="fas fa-search"></i>
                             Explore Recipes
                         </a>
