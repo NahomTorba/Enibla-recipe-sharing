@@ -1,0 +1,94 @@
+/* Filter Container Styles */
+.recipe-filters {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.filter-group {
+    margin-bottom: 1.5rem;
+}
+
+.filter-group:last-child {
+    margin-bottom: 0;
+}
+
+.filter-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+/* Dropdown Styles */
+.filter-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Checkbox Styles */
+.filter-checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.filter-checkbox:last-child {
+    margin-bottom: 0;
+}
+
+.filter-checkbox input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.filter-checkbox label {
+    cursor: pointer;
+    color: #666;
+}
+
+/* Clear Filters Button */
+.clear-filters-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: #fff;
+    color: #666;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clear-filters-btn:hover {
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.clear-filters-btn i {
+    margin-right: 0.5rem;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+    .recipe-filters {
+        padding: 1rem;
+    }
+    
+    .filter-group {
+        margin-bottom: 1rem;
+    }
+}
