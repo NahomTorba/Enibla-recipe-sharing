@@ -1,5 +1,5 @@
 {% load static %}
-{% load recipe_filters %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -179,7 +179,7 @@
                     <div class="tags-grid">
                         {% for tag_value, tag_label in all_tags %}
                         <div class="tag-item">
-                            <input type="checkbox" id="tag_{{ tag_value }}" name="tags" value="{{ tag_value }}" {% if tag_value in recipe.tags|split_tags %}checked{% endif %}>
+                            <input type="checkbox" id="tag_{{ tag_value }}" name="tags" value="{{ tag_value }}" {% if tag_value in recipe_tags %}checked{% endif %}>
                             <label for="tag_{{ tag_value }}" class="tag-label">
                                 <i class="fas fa-{% if tag_value == 'breakfast' %}coffee{% elif tag_value == 'lunch' %}hamburger{% elif tag_value == 'dinner' %}utensils{% elif tag_value == 'dessert' %}ice-cream{% elif tag_value == 'snack' %}cookie-bite{% elif tag_value == 'fasting' %}moon{% endif %}"></i>
                                 {{ tag_label }}

@@ -282,11 +282,14 @@ def edit_recipe(request, slug):
                 messages.error(request, 'Please correct the errors below.')
         else:
             form = RecipeForm(instance=recipe)
+            # split the stored tags into a list for the form
+            recipe_tags = recipe.tags.split(',') if recipe.tags else []
 
         context = {
             'recipe': recipe,
             'form': form,
-            'all_tags': TAG_CHOICES
+            'all_tags': TAG_CHOICES,
+            'recipe_tags': recipe_tags,
         }
         return render(request, 'recipes/edit_recipe.html', context)
 
