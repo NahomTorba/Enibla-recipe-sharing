@@ -29,7 +29,7 @@
                     <i class="fas fa-user"></i>
                     <span>My Profile</span>
                 </a>
-                <a href="#" class="nav-link nav-link-logout">
+                <a href="{% url 'logout' %}" class="nav-link nav-link-logout">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
                 </a>
@@ -255,8 +255,8 @@
                                 type="checkbox" 
                                 id="cuisine_{{ forloop.counter }}" 
                                 name="favorite_cuisines" 
-                                value="{{ cuisine }}"
-                                {% if cuisine in selected_cuisines %}checked{% endif %}
+                                value="{{ cuisine.0 }}"
+                                {% if cuisine.0 in selected_cuisines %}checked{% endif %}
                             >
                             <label for="cuisine_{{ forloop.counter }}" class="cuisine-label">
                                 <span class="cuisine-checkbox">
@@ -271,8 +271,12 @@
                     <div id="selectedCuisines" class="selected-cuisines" {% if not selected_cuisines %}style="display: none;"{% endif %}>
                         <p><strong>Selected cuisines:</strong></p>
                         <div id="cuisineTags" class="cuisine-tags">
-                            {% for cuisine in selected_cuisines %}
-                                <span class="cuisine-tag">{{ cuisine }}</span>
+                            {% for cuisine_value in selected_cuisines %}
+                                {% for c in cuisines %}
+                                    {% if c.0 == cuisine_value %}
+                                        <span class="cuisine-tag">{{ c.1 }}</span>
+                                    {% endif %}
+                                {% endfor %}
                             {% endfor %}
                         </div>
                     </div>
@@ -315,7 +319,7 @@
                     </div>
                     
                     <div class="account-actions">
-                        <a href="#" class="account-link">
+                        <a href="{% url 'password_reset' %}" class="account-link">
                             <i class="fas fa-key"></i>
                             <span>Change Password</span>
                             <i class="fas fa-chevron-right"></i>
