@@ -176,6 +176,35 @@
                             {% endif %}
                         </div>
 
+                        <!-- Recipe Classification -->
+                        {% if recipe.cuisine or recipe.difficulty or recipe.prep_time %}
+                        <div class="recipe-classification">
+                            {% if recipe.cuisine %}
+                            <div class="classification-item">
+                                <i class="fas fa-globe"></i>
+                                <span class="classification-label">Cuisine:</span>
+                                <span class="classification-value">{{ recipe.cuisine }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if recipe.difficulty %}
+                            <div class="classification-item">
+                                <i class="fas fa-signal"></i>
+                                <span class="classification-label">Difficulty:</span>
+                                <span class="classification-value difficulty-{{ recipe.difficulty|lower }}">{{ recipe.difficulty }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if recipe.prep_time %}
+                            <div class="classification-item">
+                                <i class="fas fa-clock"></i>
+                                <span class="classification-label">Prep Time:</span>
+                                <span class="classification-value">{{ recipe.prep_time }} minutes</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
                         <!-- Action Buttons -->
                         <div class="recipe-actions">
                             {% if user.is_authenticated and user.userprofile and user.userprofile != recipe.author %}
@@ -364,6 +393,21 @@
 
                 <!-- Sidebar -->
                 <aside class="recipe-sidebar">
+                    
+                    <!-- Recipe Tags -->
+                    {% if recipe.tags %}
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-tags"></i>
+                            Categories
+                        </h3>
+                        <div class="recipe-tags">
+                            {% for tag in recipe.get_tag_choices_list %}
+                            <span class="tag">{{ tag|title }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
                     <!-- Ingredients Checklist -->
                     <div class="sidebar-card">
                         <h3 class="sidebar-title">
@@ -374,21 +418,6 @@
                             <!-- JavaScript will populate this -->
                         </div>
                     </div>
-
-                    <!-- Recipe Tags -->
-                    {% if recipe.tags %}
-                    <div class="sidebar-card">
-                        <h3 class="sidebar-title">
-                            <i class="fas fa-tags"></i>
-                            Categories
-                        </h3>
-                        <div class="recipe-tags">
-                            {% for tag in recipe.get_tag_choices_list %}
-                                <span class="tag">{{ tag|title }}</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
                 </aside>
             </div>
         </div>

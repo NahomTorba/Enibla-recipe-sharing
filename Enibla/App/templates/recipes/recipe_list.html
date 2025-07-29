@@ -25,10 +25,10 @@
 
             <!-- Search Bar -->
             <div class="nav-search">
-                <form class="search-form" method="get" action="#">
+                <form class="search-form" method="get" action="{% url 'recipe_list' %}">
                     <div class="search-input-container">
                         <i class="fas fa-search search-icon"></i>
-                        <input type="text" name="q" placeholder="Search recipes, ingredients, or cuisines..." class="search-input" value="{{ request.GET.q|default:'' }}">
+                        <input type="text" name="q" placeholder="Search recipes, ingredients, or cuisines..." class="search-input" value="{{ search_query|default:'' }}">
                         <button type="submit" class="search-btn">
                             <i class="fas fa-arrow-right"></i>
                         </button>
@@ -155,32 +155,45 @@
 
                 <!-- Search and Filter Section -->
                 <div class="search-filter-section">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="recipeSearch" placeholder="Search recipes, ingredients, or cuisines...">
-                    </div>
-                    <div class="filter-buttons">
-                        <button class="filter-btn active" data-filter="all">
-                            <i class="fas fa-th"></i>
-                            All
-                        </button>
-                        <button class="filter-btn" data-filter="breakfast">
-                            <i class="fas fa-coffee"></i>
-                            Breakfast
-                        </button>
-                        <button class="filter-btn" data-filter="lunch">
-                            <i class="fas fa-hamburger"></i>
-                            Lunch
-                        </button>
-                        <button class="filter-btn" data-filter="dinner">
-                            <i class="fas fa-drumstick-bite"></i>
-                            Dinner
-                        </button>
-                        <button class="filter-btn" data-filter="dessert">
-                            <i class="fas fa-ice-cream"></i>
-                            Dessert
-                        </button>
-                    </div>
+                    <form method="get" action="{% url 'recipe_list' %}" class="search-filter-form" style="display: flex; flex-wrap: wrap; gap: 1em; align-items: flex-end;">
+                        <div>
+                            <input type="text" name="q" placeholder="Search recipes, ingredients, or cuisines..." value="{{ search_query|default:'' }}" class="form-control">
+                        </div>
+                        <div>
+                            <select name="cuisine" class="form-control">
+                                <option value="">All Cuisines</option>
+                                {% for value, label in CUISINE_CHOICES %}
+                                    <option value="{{ value }}" {% if selected_cuisine == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <select name="difficulty" class="form-control">
+                                <option value="">All Difficulties</option>
+                                {% for value, label in DIFFICULTY_CHOICES %}
+                                    <option value="{{ value }}" {% if selected_difficulty == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <input type="number" name="prep_time" min="1" placeholder="Max Prep Time (min)" value="{{ selected_prep_time|default:'' }}" class="form-control" style="width: 160px;">
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                            <a href="{% url 'recipe_list' %}" class="btn btn-secondary" style="margin-left: 0.5em;">Clear Filters</a>
+                        </div>
+                    </form>
+                    {% if search_query or active_tag or selected_cuisine or selected_difficulty or selected_prep_time %}
+                        <div class="current-filters" style="margin-top: 1em;">
+                            <strong>Filters:</strong>
+                            {% if search_query %} <span>Search: <em>{{ search_query }}</em></span> {% endif %}
+                            {% if active_tag %} <span>Tag: <em>{{ active_tag|title }}</em></span> {% endif %}
+                            {% if selected_cuisine %} <span>Cuisine: <em>{{ selected_cuisine }}</em></span> {% endif %}
+                            {% if selected_difficulty %} <span>Difficulty: <em>{{ selected_difficulty }}</em></span> {% endif %}
+                            {% if selected_prep_time %} <span>Prep Time ≤ <em>{{ selected_prep_time }} min</em></span> {% endif %}
+                            <a href="{% url 'recipe_list' %}" style="margin-left: 1em;">Clear filters</a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -209,6 +222,30 @@
                         <div class="recipe-content">
                             <h3 class="recipe-title">{{ recipe.title }}</h3>
                             <p class="recipe-description">{{ recipe.description|truncatewords:15 }}</p>
+                            
+                            <!-- Recipe Classification -->
+                            {% if recipe.cuisine or recipe.difficulty or recipe.prep_time %}
+                            <div class="recipe-classification-mini">
+                                {% if recipe.cuisine %}
+                                <span class="classification-badge cuisine">
+                                    <i class="fas fa-globe"></i>
+                                    {{ recipe.cuisine }}
+                                </span>
+                                {% endif %}
+                                {% if recipe.difficulty %}
+                                <span class="classification-badge difficulty difficulty-{{ recipe.difficulty|lower }}">
+                                    <i class="fas fa-signal"></i>
+                                    {{ recipe.difficulty }}
+                                </span>
+                                {% endif %}
+                                {% if recipe.prep_time %}
+                                <span class="classification-badge prep-time">
+                                    <i class="fas fa-clock"></i>
+                                    {{ recipe.prep_time }}m
+                                </span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
                             
                             <div class="recipe-meta">
                                 <div class="recipe-author">

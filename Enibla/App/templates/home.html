@@ -24,7 +24,7 @@
 
             <!-- Search Bar -->
             <div class="nav-search">
-                <form class="search-form" method="get" action="#">
+                <form class="search-form" method="get" action="{% url 'recipe_list' %}">
                     <div class="search-input-container">
                         <i class="fas fa-search search-icon"></i>
                         <input type="text" name="q" placeholder="Search recipes, ingredients, or cuisines..." class="search-input" value="{{ request.GET.q|default:'' }}">
@@ -161,7 +161,7 @@
 
                 <!-- Quick Search -->
                 <div class="hero-search">
-                    <form class="hero-search-form" method="get" action="#">
+                    <form class="hero-search-form" method="get" action="{% url 'recipe_list' %}">
                         <div class="hero-search-container">
                             <i class="fas fa-search"></i>
                             <input type="text" name="q" placeholder="Search for recipes, ingredients, or cuisines..." value="{{ request.GET.q|default:'' }}">
@@ -178,7 +178,7 @@
         <div class="container">
             <h2 class="section-title">Explore by Category</h2>
             <div class="categories-grid">
-                <a href="#" class="category-card">
+                <a href="{% url 'recipe_list' %}?tag=breakfast{% if search_query %}&q={{ search_query }}{% endif %}" class="category-card">
                     <div class="category-icon">
                         <i class="fas fa-coffee"></i>
                     </div>
@@ -186,7 +186,7 @@
                     <p>Start your day right</p>
                 </a>
                 
-                <a href="#" class="category-card">
+                <a href="{% url 'recipe_list' %}?tag=lunch{% if search_query %}&q={{ search_query }}{% endif %}" class="category-card">
                     <div class="category-icon">
                         <i class="fas fa-hamburger"></i>
                     </div>
@@ -194,7 +194,7 @@
                     <p>Midday delights</p>
                 </a>
                 
-                <a href="#" class="category-card">
+                <a href="{% url 'recipe_list' %}?tag=dinner{% if search_query %}&q={{ search_query }}{% endif %}" class="category-card">
                     <div class="category-icon">
                         <i class="fas fa-utensils"></i>
                     </div>
@@ -202,7 +202,7 @@
                     <p>Evening favorites</p>
                 </a>
                 
-                <a href="#" class="category-card">
+                <a href="{% url 'recipe_list' %}?tag=dessert{% if search_query %}&q={{ search_query }}{% endif %}" class="category-card">
                     <div class="category-icon">
                         <i class="fas fa-ice-cream"></i>
                     </div>
@@ -210,7 +210,7 @@
                     <p>Sweet endings</p>
                 </a>
                 
-                <a href="#" class="category-card">
+                <a href="{% url 'recipe_list' %}?tag=snack{% if search_query %}&q={{ search_query }}{% endif %}" class="category-card">
                     <div class="category-icon">
                         <i class="fas fa-cookie-bite"></i>
                     </div>
@@ -218,7 +218,7 @@
                     <p>Quick bites</p>
                 </a>
                 
-                <a href="#" class="category-card">
+                <a href="{% url 'recipe_list' %}?tag=fasting{% if search_query %}&q={{ search_query }}{% endif %}" class="category-card">
                     <div class="category-icon">
                         <i class="fas fa-moon"></i>
                     </div>
@@ -384,7 +384,7 @@
                     <div class="cta-actions">
                         <a href="{% url 'create_recipe' %}" class="btn btn-primary btn-large">
                             <i class="fas fa-plus"></i>
-                            Share Your First Recipe
+                            Share Your Recipe
                         </a>
                     </div>
                 {% endif %}
