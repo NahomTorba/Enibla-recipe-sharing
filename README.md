@@ -14,9 +14,8 @@ A modern recipe sharing platform built with Django, connecting food enthusiasts 
 
 ### Social Features
 - Connect with other food lovers
-- Follow favorite cuisines
 - Rate and review recipes
-- Share recipes on social media
+- Save recipes on profile
 
 ### Advanced Features
 - Recipe categorization by tags
@@ -26,9 +25,9 @@ A modern recipe sharing platform built with Django, connecting food enthusiasts 
 
 ## Technology Stack
 
-- **Backend**: Django 4.x
+- **Backend**: Django 5.2
 - **Frontend**: HTML5, CSS3, JavaScript
-- **Database**: PostgreSQL/SQLite
+- **Database**: SQLite3
 - **Authentication**: Django Authentication System
 - **Image Processing**: Pillow (PIL)
 - **File Validation**: Django File Validators
@@ -48,7 +47,6 @@ A modern recipe sharing platform built with Django, connecting food enthusiasts 
 
 - Python 3.8+
 - pip (Python package manager)
-- PostgreSQL or SQLite
 - Pillow (for image processing)
 
 ### Installation
@@ -175,11 +173,6 @@ enibla/
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Thanks to the Django community for their amazing framework
-- Special thanks to all contributors who have helped improve this project
 
 ## Support
 
