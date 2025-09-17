@@ -38,7 +38,7 @@
                     <!-- Profile Dropdown -->
                     <div class="profile-dropdown" id="profileDropdown">
                         <button class="profile-btn" id="profileBtn">
-                            {% if user.userprofile.profile_image %}
+                            {% if userApp.userprofile.profile_image %}
                                 <img src="{{ user.userprofile.profile_image.url }}" alt="Profile" class="profile-avatar">
                             {% else %}
                                 <div class="profile-avatar profile-avatar-placeholder">
@@ -55,7 +55,7 @@
                         <div class="dropdown-menu" id="dropdownMenu">
                             <div class="dropdown-header">
                                 <div class="user-info">
-                                    {% if user.userprofile.profile_image %}
+                                    {% if userApp.userprofile.profile_image %}
                                         <img src="{{ user.userprofile.profile_image.url }}" alt="Profile" class="user-avatar">
                                     {% else %}
                                         <div class="user-avatar user-avatar-placeholder">
