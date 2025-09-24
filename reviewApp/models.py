@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
-from App.models import Recipe
+from recipeApp.models import Recipe
 
 
 # Create your models here.
