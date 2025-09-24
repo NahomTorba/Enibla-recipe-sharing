@@ -4,8 +4,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 from django.contrib.auth.models import User
 
 from django.contrib.auth.decorators import login_required
-from App.models import Recipe,Review,SavedRecipe
-from .forms import  RecipeForm, ReviewForm
+from recipeApp.models import Recipe
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.db.models import  Q

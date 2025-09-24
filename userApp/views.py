@@ -1,13 +1,12 @@
 from django.shortcuts import render,redirect
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .email_utils import send_confirmation_email
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from .models import UserProfile
-from App.models import Recipe
-from .forms import SignUpForm, UserProfileForm
+from userApp.models import UserProfile
+from recipeApp.models import Recipe
+from userApp.forms import SignUpForm, UserProfileForm
 
 # Create your views here.
 
