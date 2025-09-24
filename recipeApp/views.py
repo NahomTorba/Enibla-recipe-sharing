@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q
+from django.core.paginator import Paginator
 from recipeApp.models import Recipe
 from recipeApp.forms import RecipeForm
 from reviewApp.models import Review, SavedRecipe
@@ -184,3 +185,61 @@ def recipe_detail(request, slug):
     }
     
     return render(request, 'recipes/recipe_detail.html', context)
+
+def recipe_list_view(request):
+    """
+    Function-based view for recipe list with backend filtering
+    """
+    recipes = Recipe.objects.all().order_by('-created_at')
+
+    # Get search query and tag filter from GET params
+    query = request.GET.get('q', '').strip()
+    tag = request.GET.get('tag', '').strip()
+    cuisine = request.GET.get('cuisine', '').strip()
+    difficulty = request.GET.get('difficulty', '').strip()
+    prep_time = request.GET.get('prep_time', '').strip()
+
+    # Filter by search query (title, ingredients, tags)
+    if query:
+        recipes = recipes.filter(
+            Q(title__icontains=query) |
+            Q(ingredients__icontains=query) |
+            Q(tags__icontains=query)
+        )
+
+    # Filter by tag
+    if tag:
+        recipes = recipes.filter(tags__icontains=tag)
+
+    # Filter by cuisine
+    if cuisine:
+        recipes = recipes.filter(cuisine=cuisine)
+
+    # Filter by difficulty
+    if difficulty:
+        recipes = recipes.filter(difficulty=difficulty)
+
+    # Filter by prep_time (less than or equal to user input)
+    if prep_time.isdigit():
+        recipes = recipes.filter(prep_time__lte=int(prep_time))
+
+    # Pagination
+    paginator = Paginator(recipes, 12)  # Show 12 recipes per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'recipes': page_obj,
+        'total_recipes': recipes.count(),
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
+        'search_query': query,
+        'active_tag': tag,
+        'selected_cuisine': cuisine,
+        'selected_difficulty': difficulty,
+        'selected_prep_time': prep_time,
+        'CUISINE_CHOICES': Recipe.CUISINE_CHOICES,
+        'DIFFICULTY_CHOICES': Recipe.DIFFICULTY_CHOICES,
+    }
+
+    return render(request, 'recipes/recipe_list.html', context)
