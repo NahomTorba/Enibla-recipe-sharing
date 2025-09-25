@@ -1,8 +1,14 @@
-from django.urls import path
+from django.urls import include, path
 from . import views
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework.routers import DefaultRouter
+from userApp.views import UserViewSet, UserProfileViewSet
+
+router = DefaultRouter()
+router.register(r'users', UserViewSet, basename='user')
+router.register(r'user-profiles', UserProfileViewSet, basename='userprofile')
 
 urlpatterns = [
     # Authentication URLs
@@ -22,6 +28,9 @@ urlpatterns = [
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('profile/<str:username>/', views.profile_detail, name='profile_detail'),
     path('my-profile/', views.my_profile, name='my_profile'),
+
+    # API URLs
+    path('api/', include(router.urls)),  # Include the router URLs
 ]
 
 

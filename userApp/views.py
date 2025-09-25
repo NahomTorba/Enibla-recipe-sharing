@@ -7,6 +7,11 @@ from django.contrib.auth.decorators import login_required
 from userApp.models import UserProfile
 from recipeApp.models import Recipe
 from userApp.forms import SignUpForm, UserProfileForm
+from rest_framework import viewsets
+from userApp.serializer import UserSerializer, UserProfileSerializer
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth.models import User
 
 # Create your views here.
 
@@ -189,4 +194,12 @@ def edit_profile(request):
         'selected_cuisines': selected_cuisines,
     }
     return render(request, 'profile/edit_profile.html', context)
+    
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    
+class UserProfileViewSet(viewsets.ModelViewSet):
+    queryset = UserProfile.objects.select_related('user').all()
+    serializer_class = UserProfileSerializer
     
