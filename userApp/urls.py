@@ -4,7 +4,10 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
-from userApp.views import UserViewSet, UserProfileViewSet
+from userApp.views import (
+    UserViewSet, UserProfileViewSet, api_register, api_login, 
+    api_logout, api_user_profile, api_create_update_profile
+)
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
@@ -29,8 +32,15 @@ urlpatterns = [
     path('profile/<str:username>/', views.profile_detail, name='profile_detail'),
     path('my-profile/', views.my_profile, name='my_profile'),
 
-    # API URLs
+    # REST API URLs
     path('api/', include(router.urls)),  # Include the router URLs
+    
+    # Additional API endpoints
+    path('api/auth/register/', api_register, name='api_register'),
+    path('api/auth/login/', api_login, name='api_login'),
+    path('api/auth/logout/', api_logout, name='api_logout'),
+    path('api/profile/', api_user_profile, name='api_user_profile'),
+    path('api/profile/create-update/', api_create_update_profile, name='api_create_update_profile'),
 ]
 
 
