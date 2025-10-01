@@ -12,3 +12,8 @@ class SavedRecipeSerializer(serializers.ModelSerializer):
         model = SavedRecipe
         fields = ['user', 'recipe']
         read_only_fields = ['saved_at']
+class ReviewCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['rating', 'comment']
+        read_only_fields = ['user', 'recipe', 'created_at', 'updated_at']
