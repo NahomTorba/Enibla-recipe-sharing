@@ -52,11 +52,11 @@ class RecipeForm(forms.ModelForm):
         difficulty = cleaned_data.get('difficulty')
         prep_time = cleaned_data.get('prep_time')
         if cuisine == '':
-            cleaned_data['cuisine'] = None
+            raise forms.ValidationError("Please select a cuisine type.")
         if difficulty == '':
-            cleaned_data['difficulty'] = None
+            raise forms.ValidationError("Please select a difficulty level.")
         if prep_time in [None, '']:
-            cleaned_data['prep_time'] = None
+            raise forms.ValidationError("Please enter the preparation time in minutes.")
         return cleaned_data
 
     def clean_title(self):
