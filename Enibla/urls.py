@@ -24,7 +24,7 @@ from App import urls as app_urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(app_urls)),
-    path('user/', include('userApp.urls')),
+    path('user/', include('userApp.api.urls')),
     path('recipe/', include('recipeApp.urls')),
     path('review/', include('reviewApp.urls')),
 ]
