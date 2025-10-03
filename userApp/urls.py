@@ -4,7 +4,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
-from userApp.views import (
+from userApp.api.views import (
     UserViewSet, UserProfileViewSet, api_register, api_login, 
     api_logout, api_user_profile, api_create_update_profile
 )
