@@ -10,7 +10,7 @@ from recipeApp.forms import RecipeForm
 from reviewApp.models import Review, SavedRecipe
 from reviewApp.forms import ReviewForm
 from userApp.models import UserProfile
-from recipeApp.serializer import RecipeSerializer, RecipeCreateUpdateSerializer
+from recipeApp.api.serializer import RecipeSerializer, RecipeCreateUpdateSerializer
 from rest_framework import viewsets, permissions
 from rest_framework.permissions import BasePermission
 from rest_framework.views import APIView
