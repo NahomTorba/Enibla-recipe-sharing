@@ -10,10 +10,14 @@ from recipeApp.forms import RecipeForm
 from reviewApp.models import Review, SavedRecipe
 from reviewApp.forms import ReviewForm
 from userApp.models import UserProfile
-from recipeApp.models import TAG_CHOICES, CUISINE_CHOICES
 
 
 # Create your views here.
+
+# constants
+CUISINE_CHOICES = [ ('Ethiopian', 'Ethiopian'), ('Eritrea', 'Eritrea'), ('African', 'African'), ('Italian', 'Italian'),('Mexican', 'Mexican'),('Chinese', 'Chinese'),('Japanese', 'Japanese'),('Indian', 'Indian'),('French', 'French'),('American', 'American'),('Korean', 'Korean'),('Spanish', 'Spanish'),('Middle Eastern', 'Middle Eastern'),('Brazilian', 'Brazilian'),('British', 'British')]
+TAG_CHOICES = (('breakfast', 'Breakfast'),('lunch', 'Lunch'),('dinner', 'Dinner'),('dessert', 'Dessert'),('snack', 'Snack'),('fasting', 'Fasting'),)
+
    
 @login_required
 @require_http_methods(["GET", "POST"])

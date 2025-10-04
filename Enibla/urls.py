@@ -19,12 +19,18 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from App import urls as app_urls
+from recipeApp import urls as recipe_urls
+from userApp import urls as user_urls
+from reviewApp import urls as review_urls
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(app_urls)),
-    path('user/', include('userApp.api.urls')),
-    path('recipe/', include('recipeApp.urls')),
-    path('review/', include('reviewApp.urls')),
+    path('recipe/', include(recipe_urls)),
+    path('user/', include(user_urls)),
+    path('review/', include(review_urls)),
+    path('api/user', include('userApp.api.urls')),
+    path('api/recipe', include('recipeApp.api.urls')),
+    path('api/review', include('reviewApp.urls')),
 ]

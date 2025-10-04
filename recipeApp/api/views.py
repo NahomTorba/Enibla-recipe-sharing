@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
-from recipeApp.models import TAG_CHOICES, CUISINE_CHOICES
+from recipeApp.views import TAG_CHOICES, CUISINE_CHOICES
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()

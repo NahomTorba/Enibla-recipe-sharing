@@ -1,15 +1,9 @@
-from django.shortcuts import render,redirect, get_object_or_404
-from django.contrib import messages
-from django.views.decorators.http import require_http_methods, require_POST
+from django.shortcuts import render
 from django.contrib.auth.models import User
 
-from django.contrib.auth.decorators import login_required
 from recipeApp.models import Recipe
 from django.contrib.auth.models import User
-from django.http import JsonResponse
-from django.db.models import  Q
-from django.core.paginator import Paginator
-from userApp.models import UserProfile
+
 
 
 # constants
