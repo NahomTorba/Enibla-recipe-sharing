@@ -9,12 +9,12 @@ router.register(r'RecipeCreateUpdate', RecipeCreateUpdateViewSet, basename='reci
 
 urlpatterns = [
      # REST API URLs
-    path('api/', include(router.urls)),  # Include the router URLs
+    path('', include(router.urls)),  # Include the router URLs
 
     # Additional API endpoints
-    path('api/recipes/', views.RecipeListAPIView.as_view(), name='api_recipe_list'),
-    path('api/recipes/<slug:slug>/', views.RecipeDetailAPIView.as_view(), name='api_recipe_detail'),
-    path('api/recipes/search/', views.RecipeSearchAPIView.as_view(), name='api_recipe_search'),
-    path('api/tags/', views.RecipeTagListAPIView.as_view(), name='api_tag_list'),
-    path('api/cuisines/', views.RecipeCuisineListAPIView.as_view(), name='api_cuisine_list'),
+    path('recipes/', views.RecipeListAPIView.as_view(), name='api_recipe_list'),
+    path('recipes/<slug:slug>/', views.RecipeDetailAPIView.as_view(), name='api_recipe_detail'),
+    path('recipes/search/', views.RecipeSearchAPIView.as_view(), name='api_recipe_search'),
+    path('tags/', views.RecipeTagListAPIView.as_view(), name='api_tag_list'),
+    path('cuisines/', views.RecipeCuisineListAPIView.as_view(), name='api_cuisine_list'),
 ]

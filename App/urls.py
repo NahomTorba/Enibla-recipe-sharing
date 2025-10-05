@@ -7,7 +7,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     
-    # sample url for home page
+    # url for home page
     path('', views.index, name='index'),
     path('index/', views.index, name='index'),
 
