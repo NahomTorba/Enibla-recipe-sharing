@@ -3,11 +3,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_POST
 from django.http import JsonResponse
-from userApp.models import UserProfile
 from recipeApp.models import Recipe
 from reviewApp.models import Review, SavedRecipe
 from reviewApp.forms import ReviewForm
-from reviewApp.serializer import ReviewSerializer, SavedRecipeSerializer, ReviewCreateUpdateSerializer
+from reviewApp.api.serializer import ReviewSerializer, SavedRecipeSerializer, ReviewCreateUpdateSerializer
 from rest_framework import viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
