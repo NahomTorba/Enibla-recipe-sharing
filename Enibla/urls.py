@@ -30,7 +30,7 @@ urlpatterns = [
     path('review/', include(review_urls)),
 
     #api urls
-    path('api/user', include('userApp.api.urls')),
-    path('api/recipe', include('recipeApp.api.urls')),
-    path('api/review', include('reviewApp.urls')),
+    path('api/user/', include('userApp.api.urls')),
+    path('api/recipe/', include('recipeApp.api.urls')),
+    path('api/review/', include('reviewApp.urls')),
 ]
