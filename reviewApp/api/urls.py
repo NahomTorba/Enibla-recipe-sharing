@@ -1,7 +1,7 @@
 from django.urls import path, include
-from reviewApp import views
+from reviewApp.api import views
 from rest_framework.routers import DefaultRouter
-from reviewApp.views import SavedRecipeViewSet, ReviewViewSet
+from reviewApp.api.views import SavedRecipeViewSet, ReviewViewSet
 
 router = DefaultRouter()
 router.register(r'saved-recipes', SavedRecipeViewSet, basename='savedrecipe')

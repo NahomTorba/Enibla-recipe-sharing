@@ -1,7 +1,6 @@
-from django.urls import path, include
+from django.urls import path
 from reviewApp import views
 from rest_framework.routers import DefaultRouter
-from reviewApp.views import SavedRecipeViewSet, ReviewViewSet
 
 urlpatterns = [
     # URLs for reviews
