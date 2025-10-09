@@ -32,5 +32,5 @@ urlpatterns = [
     #api urls
     path('api/user/', include('userApp.api.urls')),
     path('api/recipe/', include('recipeApp.api.urls')),
-    path('api/review/', include('reviewApp.urls')),
+    path('api/review/', include('reviewApp.api.urls')),
 ]
