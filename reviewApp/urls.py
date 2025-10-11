@@ -1,6 +1,5 @@
 from django.urls import path
 from reviewApp import views
-from rest_framework.routers import DefaultRouter
 
 urlpatterns = [
     # URLs for reviews

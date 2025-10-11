@@ -144,7 +144,7 @@ function initializeSaveButtons() {
       const icon = button.querySelector("i")
 
       try {
-        const response = await fetch(`/recipes/${recipeId}/toggle-save/`, {
+        const response = await fetch(`/review/api/save-recipe/${recipeId}/`, {
           method: "POST",
           headers: {
             "X-CSRFToken": getCookie("csrftoken"),

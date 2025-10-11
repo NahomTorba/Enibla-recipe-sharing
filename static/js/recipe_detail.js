@@ -46,7 +46,7 @@ function initializeSaveRecipe() {
 function checkSaveStatus(saveBtn) {
   const recipeId = saveBtn.dataset.recipeId
 
-  fetch(`/api/check-saved-recipe/${recipeId}/`, {
+  fetch(`/review/api/check-saved-recipe/${recipeId}/`, {
     method: "GET",
     headers: {
       "X-CSRFToken": getCookie("csrftoken"),
@@ -70,7 +70,7 @@ function saveRecipe(recipeId, saveBtn) {
   // Disable button during request
   saveBtn.disabled = true
 
-  fetch(`/api/save-recipe/${recipeId}/`, {
+  fetch(`/review/api/save-recipe/${recipeId}/`, {
     method: "POST",
     headers: {
       "X-CSRFToken": getCookie("csrftoken"),
@@ -104,7 +104,7 @@ function unsaveRecipe(recipeId, saveBtn) {
   // Disable button during request
   saveBtn.disabled = true
 
-  fetch(`/api/unsave-recipe/${recipeId}/`, {
+  fetch(`/review/api/unsave-recipe/${recipeId}/`, {
     method: "POST",
     headers: {
       "X-CSRFToken": getCookie("csrftoken"),
