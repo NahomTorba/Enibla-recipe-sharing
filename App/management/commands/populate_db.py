@@ -62,13 +62,14 @@ class Command(BaseCommand):
             recipe = choice(Recipe.objects.all())
             user = choice(User.objects.all())
 
-            Review.objects.create(
-                recipe=recipe,
-                user=user,
-                rating=randint(1, 5),
-                comment=fake.text(),
-                created_at=fake.date_this_year()
-            )
+            if not Review.objects.filter(user=user, recipe=recipe).exists():
+                Review.objects.create(
+                    recipe=recipe,
+                    user=user,
+                    rating=randint(1, 5),
+                    comment=fake.text(),
+                    created_at=fake.date_this_year()
+                )
 
         self.stdout.write(self.style.SUCCESS(f'Successfully created {num_reviews} reviews.'))
 
