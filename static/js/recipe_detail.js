@@ -375,8 +375,20 @@ function initializeNumberedDirections() {
   const directionsContent = document.getElementById("directionsContent")
 
   if (directionsContent) {
-    // The CSS handles the numbering automatically with counter-reset and counter-increment
-    // This function can be used for additional direction-related functionality if needed
+    // Check if content is not already wrapped in p tags
+    if (!directionsContent.querySelector('p')) {
+      // Get the text content
+      const text = directionsContent.textContent || directionsContent.innerText
+      
+      // Split by line breaks and filter out empty lines
+      const lines = text.split('\n').filter(line => line.trim() !== '')
+      
+      // Wrap each non-empty line in a p tag
+      directionsContent.innerHTML = lines.map(line => 
+        `<p>${line.trim()}</p>`
+      ).join('')
+    }
+    
     console.log("Numbered directions initialized")
   }
 }
