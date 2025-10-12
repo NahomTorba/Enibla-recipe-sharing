@@ -249,7 +249,7 @@
                         </h2>
                         <p class="section-subtitle">Gather these ingredients to create your delicious {{ recipe.title }}.</p>
                         <div class="ingredients-content">
-                            {{ recipe.ingredients|linebreaks }}
+                            {{ recipe.ingredients }}
                         </div>
                     </section>
 
@@ -261,7 +261,7 @@
                         </h2>
                         <p class="section-subtitle">Follow these steps to prepare your {{ recipe.title }}.</p>
                         <div class="directions-content" id="directionsContent">
-                            {{ recipe.instructions|linebreaks }}
+                            {{ recipe.instructions }}
                         </div>
                     </section>
 
