@@ -46,8 +46,8 @@ class Command(BaseCommand):
                 description=fake.text(),
                 ingredients=fake.text(),
                 instructions=fake.text(),
-                tags=fake.word(),
-                cuisine=choice([choice(Recipe.CUISINE_CHOICES)[0] for _ in range(5)]),  # Random cuisine
+                tags=choice([choice(Recipe.TAG_CHOICES)[0] for _ in range(6)]),  # Random tags
+                cuisine=choice([choice(Recipe.CUISINE_CHOICES)[0] for _ in range(15)]),  # Random cuisine
                 difficulty=choice([difficulty[0] for difficulty in Recipe.DIFFICULTY_CHOICES]),
                 prep_time=randint(10, 120),
                 created_at=fake.date_this_year(),
