@@ -7,7 +7,6 @@ from django.contrib.auth.decorators import login_required
 from userApp.models import UserProfile
 from recipeApp.models import Recipe
 from userApp.forms import SignUpForm, UserProfileForm
-from django.contrib.auth import authenticate
 
 # Create your views here.
 
