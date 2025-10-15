@@ -1,5 +1,4 @@
 from django.test import TestCase, Client
-from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 from django.urls import reverse

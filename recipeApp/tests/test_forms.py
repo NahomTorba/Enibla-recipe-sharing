@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from App.models import UserProfile
-from App.forms import RecipeForm
+from userApp.models import UserProfile
+from recipeApp.forms import RecipeForm
 
 
 class RecipeFormTests(TestCase):
