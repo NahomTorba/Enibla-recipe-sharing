@@ -1,9 +1,9 @@
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
-from App.models import UserProfile, Recipe
-from django.contrib.auth import get_user_model
+from userApp.models import UserProfile
+from recipeApp.models import Recipe
+from django.contrib.auth.models import User
 
-User = get_user_model()
 
 class RecipeModelTests(TestCase):
     def setUp(self):
@@ -32,7 +32,7 @@ class RecipeModelTests(TestCase):
     def test_get_tag_choices_list(self):
         """Test that the helper method splits the tags correctly."""
         expected = ['dinner', ' Italian']
-        self.assertEqual(self.recipe.get_tag_choices_list(), expected)
+        self.assertEqual(self.recipe.get_tag_choices_list, expected)
 
     def test_recipe_image_upload(self):
         """Test image upload handling in the Recipe model."""
