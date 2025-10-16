@@ -2,7 +2,9 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-from App.models import Recipe, RecipeView, UserProfile
+from userApp.models import UserProfile
+from recipeApp.models import Recipe
+from recipeApp.views import RecipeView
 from datetime import timedelta
 import random
 import datetime

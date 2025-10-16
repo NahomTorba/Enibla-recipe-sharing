@@ -2,7 +2,9 @@ from django.test import TestCase, Client
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 from django.urls import reverse
-from App.models import UserProfile, Recipe, slugify
+from userApp.models import UserProfile
+from recipeApp.models import Recipe 
+from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 import datetime
 
