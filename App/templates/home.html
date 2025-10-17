@@ -293,6 +293,7 @@
                         <i class="fas fa-utensils empty-icon"></i>
                         <h3>No recipes yet</h3>
                         <p>Be the first to share a delicious recipe!</p>
+                        <p>No featured recipes available</p>
                         {% if user.is_authenticated %}
                             <a href="{% url 'create_recipe' %}" class="btn btn-primary">
                                 <i class="fas fa-plus"></i>
@@ -306,6 +307,42 @@
                         {% endif %}
                     </div>
                 {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Trending Recipes -->
+    <section class="featured-recipes">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Trending Recipes</h2>
+            </div>
+            <div class="recipes-grid">
+                {% if trending_recipes %}
+                    {% for recipe in trending_recipes %}
+                        <div class="recipe-card">
+                            <div class="recipe-image">
+                                {% if recipe.image %}
+                                    <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+                                {% else %}
+                                    <div class="recipe-placeholder">
+                                        <i class="fas fa-utensils"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="recipe-content">
+                                <h3 class="recipe-title">{{ recipe.title }}</h3>
+                                <a href="{% url 'recipe_detail' recipe.slug %}" class="recipe-link">
+                                    View Recipe <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <h3>No trending recipes yet</h3>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </section>

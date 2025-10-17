@@ -5,13 +5,9 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
-    
-    # url for home page
-    path('', views.index, name='index'),
+    # Home page
+    path('', views.index, name='home'),
     path('index/', views.index, name='index'),
-
-    
-    
 ]
 
 

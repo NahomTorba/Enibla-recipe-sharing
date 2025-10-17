@@ -149,7 +149,7 @@
                     <h1>Discover Amazing Recipes</h1>
                     <p class="recipe-count">
                         <i class="fas fa-utensils"></i>
-                        {{ total_recipes }} delicious recipe{{ total_recipes|pluralize }} waiting for you
+                        {{ total_recipes }} recipes found
                     </p>
                 </div>
 
@@ -183,16 +183,31 @@
                             <a href="{% url 'recipe_list' %}" class="btn btn-secondary" style="margin-left: 0.5em;">Clear Filters</a>
                         </div>
                     </form>
-                    {% if search_query or active_tag or selected_cuisine or selected_difficulty or selected_prep_time %}
+                    {% if search_query or selected_tags or selected_cuisine or selected_difficulty or selected_prep_time %}
                         <div class="current-filters" style="margin-top: 1em;">
                             <strong>Filters:</strong>
                             {% if search_query %} <span>Search: <em>{{ search_query }}</em></span> {% endif %}
-                            {% if active_tag %} <span>Tag: <em>{{ active_tag|title }}</em></span> {% endif %}
+                            {% for t in selected_tags %}
+                                <a class="active" href="?tag={{ t }}">{{ t|title }}</a>
+                            {% endfor %}
                             {% if selected_cuisine %} <span>Cuisine: <em>{{ selected_cuisine }}</em></span> {% endif %}
                             {% if selected_difficulty %} <span>Difficulty: <em>{{ selected_difficulty }}</em></span> {% endif %}
                             {% if selected_prep_time %} <span>Prep Time ≤ <em>{{ selected_prep_time }} min</em></span> {% endif %}
                             <a href="{% url 'recipe_list' %}" style="margin-left: 1em;">Clear filters</a>
                         </div>
+                    {% endif %}
+
+                    <!-- Tag Filters with counts -->
+                    {% if tag_counts %}
+                    <div class="tag-filters" style="margin-top: 1em; display:flex; flex-wrap: wrap; gap: .5em;">
+                        {% for tag, count in tag_counts.items %}
+                            {% if selected_tags and tag in selected_tags %}
+                                <a class="active" href="?tag={{ tag }}">{{ tag|title }} <span class="count">({{ count }})</span></a>
+                            {% else %}
+                                <a href="?tag={{ tag }}">{{ tag|title }} <span class="count">({{ count }})</span></a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -332,7 +347,13 @@
                     <div class="empty-icon">
                         <i class="fas fa-utensils"></i>
                     </div>
-                    <h3>No recipes found</h3>
+                    {% if search_query %}
+                        <h3>No recipes found matching "{{ search_query }}"</h3>
+                    {% elif selected_tags %}
+                        <h3>No recipes found matching the selected filters</h3>
+                    {% else %}
+                        <h3>No recipes found</h3>
+                    {% endif %}
                     <p>Be the first to share a delicious recipe with the Enibla community!</p>
                     <a href="{% url 'create_recipe' %}" class="btn btn-primary">
                         <i class="fas fa-plus"></i>
