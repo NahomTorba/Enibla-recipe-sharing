@@ -250,16 +250,6 @@ def recipe_list_view(request):
     if prep_time.isdigit():
         recipes = recipes.filter(prep_time__lte=int(prep_time))
 
-    # Compute tag counts for the currently filtered recipe set (post-tag-filter)
-    tag_counts = {}
-    for r in recipes:
-        if not r.tags:
-            continue
-        for t in r.tags.split(','):
-            key = t.strip()
-            if not key:
-                continue
-            tag_counts[key] = tag_counts.get(key, 0) + 1
 
     # Pagination (disable when tag filters active). Otherwise, ensure invalid page falls back to 1
     paginator = Paginator(recipes, 10)
@@ -290,7 +280,6 @@ def recipe_list_view(request):
         'selected_prep_time': prep_time,
         'CUISINE_CHOICES': Recipe.CUISINE_CHOICES,
         'DIFFICULTY_CHOICES': Recipe.DIFFICULTY_CHOICES,
-        'tag_counts': tag_counts,
     }
 
     return render(request, 'recipes/recipe_list.html', context)

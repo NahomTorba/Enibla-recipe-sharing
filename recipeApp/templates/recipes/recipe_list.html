@@ -197,18 +197,7 @@
                         </div>
                     {% endif %}
 
-                    <!-- Tag Filters with counts -->
-                    {% if tag_counts %}
-                    <div class="tag-filters" style="margin-top: 1em; display:flex; flex-wrap: wrap; gap: .5em;">
-                        {% for tag, count in tag_counts.items %}
-                            {% if selected_tags and tag in selected_tags %}
-                                <a class="active" href="?tag={{ tag }}">{{ tag|title }} <span class="count">({{ count }})</span></a>
-                            {% else %}
-                                <a href="?tag={{ tag }}">{{ tag|title }} <span class="count">({{ count }})</span></a>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                    {% endif %}
+                    
                 </div>
             </div>
 
