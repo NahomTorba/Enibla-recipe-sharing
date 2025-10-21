@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from recipeApp.models import UserProfile
+from userApp.models import UserProfile
 from django.utils import timezone
 
 class UserProfileModelTest(TestCase):
@@ -42,4 +42,4 @@ class UserProfileModelTest(TestCase):
 
     def test_profile_image_optional(self):
         profile = UserProfile.objects.create(user=self.user)
-        self.assertIsNone(profile.profile_image)
+        self.assertIsNone(profile.profile_image.name)
