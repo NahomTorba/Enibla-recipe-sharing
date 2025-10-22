@@ -74,3 +74,49 @@ class UserAppViewsTestCase(TestCase):
         response = self.client.get(reverse('signup'))
         self.assertRedirects(response, reverse('index'))
 
+    def test_login_view_get(self):
+        """Test login view GET request"""
+        response = self.client.get(reverse('login'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'form')
+
+    def test_login_view_post_valid(self):
+        """Test login view with valid credentials"""
+        data = {
+            'username': 'testuser',
+            'password': 'testpass123'
+        }
+        response = self.client.post(reverse('login'), data)
+        self.assertRedirects(response, reverse('index'))
+
+    def test_login_view_post_invalid(self):
+        """Test login view with invalid credentials"""
+        data = {
+            'username': 'testuser',
+            'password': 'wrongpassword'
+        }
+        response = self.client.post(reverse('login'), data)
+        self.assertEqual(response.status_code, 200)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any('Invalid username or password' in str(message) for message in messages))
+
+    def test_login_view_authenticated_user(self):
+        """Test login view when user is already authenticated"""
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(reverse('login'))
+        self.assertRedirects(response, reverse('index'))
+
+    def test_logout_view_authenticated(self):
+        """Test logout view for authenticated user"""
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(reverse('logout'))
+        self.assertRedirects(response, reverse('login'))
+        
+        # Check user is logged out
+        response = self.client.get(reverse('profile_detail', kwargs={'username': 'testuser'}))
+        self.assertRedirects(response, reverse('login'))
+
+    def test_logout_view_unauthenticated(self):
+        """Test logout view for unauthenticated user"""
+        response = self.client.get(reverse('logout'))
+        self.assertRedirects(response, reverse('login'))
