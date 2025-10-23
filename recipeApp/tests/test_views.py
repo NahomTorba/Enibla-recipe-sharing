@@ -126,4 +126,98 @@ class RecipeAppViewsTestCase(TestCase):
         response = self.client.get(reverse('create_recipe'))
         self.assertRedirects(response, reverse('create_profile'))
 
-    
+    def test_edit_recipe_get(self):
+        """Test edit recipe view GET request"""
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(reverse('edit_recipe', kwargs={'slug': self.recipe.slug}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'form')
+        self.assertIn('recipe_tags', response.context)
+
+    def test_edit_recipe_post_valid(self):
+        """Test edit recipe view with valid POST data"""
+        self.client.login(username='testuser', password='testpass123')
+        
+        data = {
+            'title': 'Updated Recipe',
+            'description': 'An updated description for the recipe',
+            'ingredients': '3 cups flour\n2 cups sugar\n4 eggs',
+            'instructions': 'Updated instructions: Mix all ingredients and bake for 45 minutes',
+            'cuisine': 'Mexican',
+            'difficulty': 'Hard',
+            'prep_time': 60,
+            'tags': ['dinner', 'snack']
+        }
+        response = self.client.post(reverse('edit_recipe', kwargs={'slug': self.recipe.slug}), data)
+        
+        # Check recipe was updated
+        updated_recipe = Recipe.objects.get(slug=self.recipe.slug)
+        self.assertEqual(updated_recipe.title, 'Updated Recipe')
+        self.assertEqual(updated_recipe.cuisine, 'Mexican')
+        self.assertEqual(updated_recipe.tags, 'dinner,snack')
+        
+        # Check redirect
+        self.assertRedirects(response, reverse('recipe_detail', kwargs={'slug': self.recipe.slug}))
+
+    def test_edit_recipe_post_invalid(self):
+        """Test edit recipe view with invalid POST data"""
+        self.client.login(username='testuser', password='testpass123')
+        
+        data = {
+            'title': 'AB',  # Too short
+            'description': 'Short',  # Too short
+            'ingredients': 'Few',  # Too short
+            'instructions': 'Brief',  # Too short
+        }
+        response = self.client.post(reverse('edit_recipe', kwargs={'slug': self.recipe.slug}), data)
+        self.assertEqual(response.status_code, 200)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any('Please correct the errors' in str(message) for message in messages))
+
+    def test_edit_recipe_unauthorized_user(self):
+        """Test edit recipe view for unauthorized user"""
+        self.client.login(username='otheruser', password='testpass123')
+        response = self.client.get(reverse('edit_recipe', kwargs={'slug': self.recipe.slug}))
+        self.assertRedirects(response, reverse('recipe_detail', kwargs={'slug': self.recipe.slug}))
+        
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("You don't have permission" in str(message) for message in messages))
+
+    def test_edit_recipe_not_found(self):
+        """Test edit recipe view for non-existing recipe"""
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(reverse('edit_recipe', kwargs={'slug': 'non-existent'}))
+        self.assertRedirects(response, reverse('index'))
+
+    def test_delete_recipe_get(self):
+        """Test delete recipe view GET request"""
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(reverse('delete_recipe', kwargs={'slug': self.recipe.slug}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.recipe.title)
+
+    def test_delete_recipe_post(self):
+        """Test delete recipe view POST request"""
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(reverse('delete_recipe', kwargs={'slug': self.recipe.slug}))
+        
+        # Check recipe was deleted
+        self.assertFalse(Recipe.objects.filter(slug=self.recipe.slug).exists())
+        
+        # Check redirect
+        self.assertRedirects(response, reverse('index'))
+
+    def test_delete_recipe_unauthorized_user(self):
+        """Test delete recipe view for unauthorized user"""
+        self.client.login(username='otheruser', password='testpass123')
+        response = self.client.get(reverse('delete_recipe', kwargs={'slug': self.recipe.slug}))
+        self.assertRedirects(response, reverse('recipe_detail', kwargs={'slug': self.recipe.slug}))
+        
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("You can only delete your own recipes" in str(message) for message in messages))
+
+    def test_delete_recipe_not_found(self):
+        """Test delete recipe view for non-existing recipe"""
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(reverse('delete_recipe', kwargs={'slug': 'non-existent'}))
+        self.assertRedirects(response, reverse('index'))
