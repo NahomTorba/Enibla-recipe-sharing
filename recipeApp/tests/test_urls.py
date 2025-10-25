@@ -423,3 +423,5 @@ class RecipeAppURLsTestCase(TestCase):
             response = self.client.post(url, data)
             self.assertIn(response.status_code, [200, 302, 404], 
                          f"POST {url} returned unexpected status: {response.status_code}")
+
+
