@@ -48,3 +48,33 @@ class AddReviewTestCase(TestCase):
         self.assertRedirects(response, reverse('recipe_detail', kwargs={'slug': self.recipe.slug}))
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(len(messages) > 0)
+
+
+    def test_edit_review_logged_in_user(self):
+        # Setup
+        user = User.objects.create_user(username='testuser', password='password')
+        recipe = Recipe.objects.create(title='Test Recipe', slug='test-recipe')
+        review = Review.objects.create(user=user, recipe=recipe, content='Great recipe!')
+        self.client.login(username='testuser', password='password')
+        
+        # Test
+        response = self.client.get(reverse('edit_review', kwargs={'review_id': review.id}))
+        
+        # Assertions
+        self.assertRedirects(response, reverse('recipe_detail', kwargs={'slug': recipe.slug}))
+        self.assertEqual(response.cookies['sessionid'].value, 'editing_review_id')
+        self.assertIn('You can now update your review below.', response.cookies['messages'])
+
+    def test_edit_review_other_user(self):
+        # Setup
+        user1 = User.objects.create_user(username='user1', password='password')
+        user2 = User.objects.create_user(username='user2', password='password')
+        recipe = Recipe.objects.create(title='Test Recipe', slug='test-recipe')
+        review = Review.objects.create(user=user1, recipe=recipe, content='Great recipe!')
+        self.client.login(username='user2', password='password')
+        
+        # Test
+        response = self.client.get(reverse('edit_review', kwargs={'review_id': review.id}))
+        
+        # Assertions
+        self.assertEqual(response.status_code, 403)  # Forbidden (user2 cannot edit user1's review)
