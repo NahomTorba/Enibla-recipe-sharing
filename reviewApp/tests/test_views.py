@@ -78,3 +78,33 @@ class AddReviewTestCase(TestCase):
         
         # Assertions
         self.assertEqual(response.status_code, 403)  # Forbidden (user2 cannot edit user1's review)
+
+    def test_delete_review_logged_in_user(self):
+        # Setup
+        user = User.objects.create_user(username='testuser', password='password')
+        recipe = Recipe.objects.create(title='Test Recipe', slug='test-recipe')
+        review = Review.objects.create(user=user, recipe=recipe, content='Great recipe!')
+        self.client.login(username='testuser', password='password')
+        
+        # Test
+        response = self.client.post(reverse('delete_review', kwargs={'review_id': review.id}))
+        
+        # Assertions
+        self.assertRedirects(response, reverse('recipe_detail', kwargs={'slug': recipe.slug}))
+        self.assertFalse(Review.objects.filter(id=review.id).exists())  # Ensure the review is deleted
+        self.assertIn('Your review has been deleted!', response.cookies['messages'])
+
+    def test_delete_review_other_user(self):
+        # Setup
+        user1 = User.objects.create_user(username='user1', password='password')
+        user2 = User.objects.create_user(username='user2', password='password')
+        recipe = Recipe.objects.create(title='Test Recipe', slug='test-recipe')
+        review = Review.objects.create(user=user1, recipe=recipe, content='Great recipe!')
+        self.client.login(username='user2', password='password')
+        
+        # Test
+        response = self.client.post(reverse('delete_review', kwargs={'review_id': review.id}))
+        
+        # Assertions
+        self.assertRedirects(response, reverse('recipe_detail', kwargs={'slug': recipe.slug}))
+        self.assertIn('You can only delete your own reviews.', response.cookies['messages'])
