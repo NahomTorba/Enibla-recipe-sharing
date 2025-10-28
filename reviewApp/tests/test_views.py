@@ -136,3 +136,29 @@ class SaveRecipeTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['message'], 'Recipe removed from saved recipes.')
         self.assertFalse(SavedRecipe.objects.filter(user=self.user, recipe=self.recipe).exists())
+
+class CheckSavedRecipeTestCase(TestCase):
+    def setUp(self):
+        # Create a test user and recipe
+        self.user = User.objects.create_user(username='testuser', password='testpass')
+        self.recipe = Recipe.objects.create(name='Test Recipe', slug='test-recipe')
+
+    def test_check_saved_recipe_true(self):
+        """Test that the recipe is marked as saved for the user"""
+        SavedRecipe.objects.create(user=self.user, recipe=self.recipe)  # Create a saved recipe
+        
+        self.client.login(username='testuser', password='testpass')
+        response = self.client.get(reverse('check_saved_recipe', kwargs={'slug': self.recipe.slug}))
+        
+        # Check that the recipe is saved
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['is_saved'])
+
+    def test_check_saved_recipe_false(self):
+        """Test that the recipe is not marked as saved for the user"""
+        self.client.login(username='testuser', password='testpass')
+        response = self.client.get(reverse('check_saved_recipe', kwargs={'slug': self.recipe.slug}))
+        
+        # Check that the recipe is not saved
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()['is_saved'])
