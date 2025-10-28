@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
 from recipeApp.models import Recipe
-from reviewApp.models import Review
+from reviewApp.models import Review, SavedRecipe
 from django.contrib.messages import get_messages
 
 class AddReviewTestCase(TestCase):
@@ -108,3 +108,31 @@ class AddReviewTestCase(TestCase):
         # Assertions
         self.assertRedirects(response, reverse('recipe_detail', kwargs={'slug': recipe.slug}))
         self.assertIn('You can only delete your own reviews.', response.cookies['messages'])
+
+class SaveRecipeTestCase(TestCase):
+    def setUp(self):
+        # Create a test user
+        self.user = User.objects.create_user(username='testuser', password='testpass')
+        self.recipe = Recipe.objects.create(name='Test Recipe', slug='test-recipe')
+
+    def test_save_recipe_create(self):
+        """Test saving a recipe to the user's saved recipes"""
+        self.client.login(username='testuser', password='testpass')
+        response = self.client.post(reverse('save_recipe', kwargs={'slug': self.recipe.slug}))
+        
+        # Check the response and database state
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Recipe saved!')
+        self.assertTrue(SavedRecipe.objects.filter(user=self.user, recipe=self.recipe).exists())
+
+    def test_save_recipe_unsave(self):
+        """Test unsaving a recipe from the user's saved recipes"""
+        SavedRecipe.objects.create(user=self.user, recipe=self.recipe)  # Create a saved recipe
+
+        self.client.login(username='testuser', password='testpass')
+        response = self.client.post(reverse('save_recipe', kwargs={'slug': self.recipe.slug}))
+        
+        # Check the response and database state
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Recipe removed from saved recipes.')
+        self.assertFalse(SavedRecipe.objects.filter(user=self.user, recipe=self.recipe).exists())
