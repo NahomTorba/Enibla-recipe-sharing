@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
 from recipeApp.models import Recipe
@@ -162,3 +162,47 @@ class CheckSavedRecipeTestCase(TestCase):
         # Check that the recipe is not saved
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.json()['is_saved'])
+
+class UnsaveRecipeViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='tester', password='password123')
+        self.recipe = Recipe.objects.create(title='Test Recipe', slug='test-recipe')
+        self.url = reverse('unsave_recipe', args=[self.recipe.slug])
+
+    def test_unsave_recipe_success(self):
+        """User successfully unsaves a recipe."""
+        SavedRecipe.objects.create(user=self.user, recipe=self.recipe)
+
+        self.client.login(username='tester', password='password123')
+        response = self.client.post(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['message'], 'Recipe unsaved successfully.')
+
+        # Ensure the SavedRecipe was deleted
+        self.assertFalse(SavedRecipe.objects.filter(user=self.user, recipe=self.recipe).exists())
+
+    def test_unsave_recipe_not_found_in_saved(self):
+        """User tries to unsave a recipe they haven’t saved."""
+        self.client.login(username='tester', password='password123')
+        response = self.client.post(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Recipe not found in saved recipes.')
+
+    def test_unsave_recipe_requires_login(self):
+        """Anonymous users are redirected to login."""
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)  # Redirect to login page
+        self.assertIn('/login', response.url)
+
+    def test_unsave_recipe_disallows_get(self):
+        """The view should reject non-POST requests."""
+        self.client.login(username='tester', password='password123')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 405)  # Method Not Allowed
