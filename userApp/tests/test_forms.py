@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from userApp.forms import SignUpForm
+from userApp.models import UserProfile
+from userApp.forms import UserProfileForm
 
 class SignUpFormTest(TestCase):
 
@@ -130,3 +132,80 @@ class SignUpFormTest(TestCase):
         password_widget = form.fields['password1'].widget.attrs
         self.assertEqual(password_widget['placeholder'], 'Create a strong password')
         self.assertEqual(password_widget['class'], 'form-control')
+class UserProfileFormTest(TestCase):
+
+    def setUp(self):
+        # Create a UserProfile instance for use in tests
+        self.user_profile = UserProfile.objects.create(
+            profile_image='path/to/image.jpg',
+            bio='A passionate cook with a love for spicy foods.',
+            favorite_cuisines='Italian,Mexican'
+        )
+
+    def test_form_initialization_with_existing_data(self):
+        form = UserProfileForm(instance=self.user_profile)
+        self.assertEqual(form.initial['favorite_cuisines'], ['Italian', 'Mexican'])
+
+    def test_form_initialization_with_no_data(self):
+        user_profile = UserProfile.objects.create(profile_image='path/to/image.jpg', bio='Test bio')
+        form = UserProfileForm(instance=user_profile)
+        self.assertEqual(form.initial['favorite_cuisines'], [])
+
+    def test_form_save_with_valid_data(self):
+        form_data = {
+            'profile_image': 'path/to/image.jpg',
+            'bio': 'Test bio',
+            'favorite_cuisines': ['Italian', 'Mexican']
+        }
+        form = UserProfileForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        profile = form.save()
+        self.assertEqual(profile.favorite_cuisines, 'Italian,Mexican')
+
+    def test_form_save_with_no_favorite_cuisines(self):
+        form_data = {
+            'profile_image': 'path/to/image.jpg',
+            'bio': 'Test bio',
+            'favorite_cuisines': []
+        }
+        form = UserProfileForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        profile = form.save()
+        self.assertEqual(profile.favorite_cuisines, '')
+
+    def test_form_invalid_favorite_cuisines(self):
+        form_data = {
+            'profile_image': 'path/to/image.jpg',
+            'bio': 'Test bio',
+            'favorite_cuisines': ['InvalidCuisine']
+        }
+        form = UserProfileForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('favorite_cuisines', form.errors)
+
+    def test_form_bio_max_length(self):
+        form_data = {
+            'profile_image': 'path/to/image.jpg',
+            'bio': 'a' * 501,  # Exceeds 500 characters
+            'favorite_cuisines': ['Italian']
+        }
+        form = UserProfileForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('bio', form.errors)
+
+    def test_form_rendering(self):
+        form = UserProfileForm(instance=self.user_profile)
+        self.assertIn('<textarea', form.as_p())
+        self.assertIn('<input type="checkbox"', form.as_p())
+
+    def test_form_save_with_bio_only(self):
+        form_data = {
+            'profile_image': 'path/to/image.jpg',
+            'bio': 'A bio without cuisines.',
+            'favorite_cuisines': []
+        }
+        form = UserProfileForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        profile = form.save()
+        self.assertEqual(profile.favorite_cuisines, '')
+        self.assertEqual(profile.bio, 'A bio without cuisines.')
