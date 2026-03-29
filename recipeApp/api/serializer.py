@@ -4,18 +4,25 @@ from recipeApp.models import Recipe
 class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = ['id', 'title', 'description', 'ingredients', 'instructions', 'created_at', 'updated_at', 'author']
+        fields = ['id', 'title', 'image', 'tags', 'description', 'ingredients', 'instructions', 'created_at', 'updated_at', 'author']
         read_only_fields = ['id', 'created_at', 'updated_at', 'author']
+    def get_image(self, obj):
+        request = self.context.get('request')
+        if obj.image:
+            return request.build_absolute_uri(obj.image.url)
+        return None
+    def get_tag(self, obj):
+        request = self.context.get('request')
+        if obj.tags:
+            return [tag.name for tag in obj.tags.all()]
+        return None
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ['title', 'description', 'ingredients', 'instructions', 'image', 'cuisine', 'difficulty', 'prep_time']
         read_only_fields = ['author']
-    def validate_title(self, value):
-        if Recipe.objects.filter(title=value).exists():
-            raise serializers.ValidationError("A recipe with this title already exists.")
-        return value
+    
     def validate_description(self, value):
         if len(value) < 10:
             raise serializers.ValidationError("Description must be at least 10 characters long.")

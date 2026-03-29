@@ -141,7 +141,7 @@ def api_login(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    user = authenticate(username=username, password=password)
+    user = authenticate(request, username=username, password=password)
     if user:
         token, created = Token.objects.get_or_create(user=user)
         return Response({

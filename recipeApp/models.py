@@ -23,7 +23,7 @@ class Recipe(models.Model):
         ('snack', 'Snack'),
         ('fasting', 'Fasting'),
     )
-    tags = models.CharField(max_length=100, blank=True)
+    tags = models.CharField(max_length=20, choices=TAG_CHOICES, blank=True)
     image = models.ImageField(
         upload_to='recipe_images/',
         blank=True,

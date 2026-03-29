@@ -60,11 +60,20 @@ class RecipeCreateUpdateViewSet(viewsets.ModelViewSet):
     
 #additional API views 
 
-# API: List all recipes
+# API: List all recipes (supports ?tag=<tag> query param for filtering)
 class RecipeListAPIView(ListAPIView):
-    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        queryset = Recipe.objects.all()
+        tag = self.request.query_params.get('tag', None)
+        if tag:
+            queryset = queryset.filter(tags__icontains=tag)
+        return queryset
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
 # API: Retrieve a single recipe by slug
 class RecipeDetailAPIView(RetrieveAPIView):
