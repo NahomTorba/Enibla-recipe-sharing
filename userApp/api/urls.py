@@ -6,7 +6,7 @@ from userApp.api.views import (
 )
 
 router = DefaultRouter()
-router.register(r'', UserViewSet, basename='user')
+router.register(r'users', UserViewSet, basename='user')
 router.register(r'profiles', UserProfileViewSet, basename='userprofile')
 
 urlpatterns = [
