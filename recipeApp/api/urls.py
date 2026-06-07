@@ -13,8 +13,8 @@ urlpatterns = [
 
     # Additional API endpoints
     path('recipes/', views.RecipeListAPIView.as_view(), name='api_recipe_list'),
-    path('recipes/<slug:slug>/', views.RecipeDetailAPIView.as_view(), name='api_recipe_detail'),
     path('recipes/search/', views.RecipeSearchAPIView.as_view(), name='api_recipe_search'),
+    path('recipes/<slug:slug>/', views.RecipeDetailAPIView.as_view(), name='api_recipe_detail'),
     path('tags/', views.RecipeTagListAPIView.as_view(), name='api_tag_list'),
     path('cuisines/', views.RecipeCuisineListAPIView.as_view(), name='api_cuisine_list'),
 ]

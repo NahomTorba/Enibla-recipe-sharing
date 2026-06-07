@@ -93,9 +93,12 @@ class RecipeSearchAPIView(APIView):
             recipes = recipes.filter(
                 Q(title__icontains=query) |
                 Q(ingredients__icontains=query) |
+                Q(instructions__icontains=query) |
                 Q(tags__icontains=query)
             )
-        serializer = RecipeSerializer(recipes, many=True)
+        serializer = RecipeSerializer(
+            recipes, many=True, context={'request': request}
+        )
         return Response(serializer.data)
 
 # API: List all available tags
