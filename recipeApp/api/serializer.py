@@ -27,14 +27,6 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         if len(value) < 10:
             raise serializers.ValidationError("Description must be at least 10 characters long.")
         return value
-    def validate_ingredients(self, value):
-        if len(value) < 10:
-            raise serializers.ValidationError("Ingredients must be at least 10 characters long.")
-        return value
-    def validate_instructions(self, value):
-        if len(value) < 10:
-            raise serializers.ValidationError("Instructions must be at least 10 characters long.")
-        return value
     def validate_prep_time(self, value):
         if value is not None and value <= 0:
             raise serializers.ValidationError("Preparation time must be a positive integer.")
